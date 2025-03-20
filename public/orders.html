@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Super Mall - Order History">
+    <meta name="keywords" content="Super Mall, Order History">
+    <meta name="author" content="Super Mall Team">
+    <title>Order History - Super Mall Web App</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-semibold">Super Mall</h1>
+            <nav>
+                <ul class="flex space-x-4" id="auth-links">
+                    <li><a href="index.html" class="hover:underline">Home</a></li>
+                    <li><a href="cart.html" class="hover:underline">Cart</a></li>
+                    <li><a href="orders.html" class="hover:underline">Orders</a></li>
+                    <li><a href="profile.html" class="hover:underline">Profile</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mx-auto py-16">
+        <h2 class="text-3xl font-bold mb-8 text-center">Order History</h2>
+        <div id="ordersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Orders will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>&copy; 2025 Super Mall. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/orders.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Super Mall - Shop Owner Dashboard to manage store, offers, and insights.">
+    <meta name="keywords" content="Super Mall, Shopping, Shop Owner, Dashboard, Offers, Reviews, Analytics">
+    <meta name="author" content="Super Mall Team">
+    <title>Shop Owner Dashboard - Super Mall Web App</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Firebase (Optimized) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import firebaseConfig from "./js/firebase-config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+    </script>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-semibold">Super Mall</h1>
+            <nav>
+                <ul class="flex space-x-4" id="auth-links">
+                    <li><a href="index.html" class="hover:underline">Home</a></li>
+                    <li><a href="mall.html" class="hover:underline">Mall</a></li>
+                    <li><a href="shop.html" class="hover:underline">Shops</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mx-auto py-16">
+        <!-- Sidebar -->
+        <aside class="w-1/4 float-left bg-gray-200 p-4 rounded-lg shadow-md">
+            <nav>
+                <ul>
+                    <li><a href="#overview" class="block py-2 px-4 hover:bg-gray-300 rounded">Dashboard Overview</a></li>
+                    <li><a href="#store-details" class="block py-2 px-4 hover:bg-gray-300 rounded">Manage Store Details</a></li>
+                    <li><a href="#offers" class="block py-2 px-4 hover:bg-gray-300 rounded">Manage Offers</a></li>
+                    <li><a href="#reviews" class="block py-2 px-4 hover:bg-gray-300 rounded">Customer Reviews</a></li>
+                    <li><a href="#advanced-analytics" class="block py-2 px-4 hover:bg-gray-300 rounded">Advanced Analytics</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="w-3/4 float-right">
+            <!-- Dashboard Overview -->
+            <section id="overview" class="mb-16">
+                <h2 class="text-3xl font-bold mb-8">Dashboard Overview</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Total Revenue</h3>
+                        <p id="revenue" class="text-2xl">₹0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Foot Traffic</h3>
+                        <p id="footTraffic" class="text-2xl">0 Visitors</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Active Offers</h3>
+                        <p id="activeOffers" class="text-2xl">0 Active Offers</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Average Rating</h3>
+                        <p id="averageRating" class="text-2xl">⭐ 0</p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Manage Store Details -->
+            <section id="store-details" class="mb-16">
+                <h2 class="text-3xl font-bold mb-8">Manage Store Details</h2>
+                <form id="store-details-form">
+                    <div class="mb-4">
+                        <label for="storeName" class="block text-lg font-bold mb-2">Store Name</label>
+                        <input type="text" id="storeName" class="w-full p-3 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="storeCategory" class="block text-lg font-bold mb-2">Category</label>
+                        <input type="text" id="storeCategory" class="w-full p-3 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="storeDescription" class="block text-lg font-bold mb-2">Description</label>
+                        <textarea id="storeDescription" class="w-full p-3 border border-gray-300 rounded-md" required></textarea>
+                    </div>
+                    <button type="submit" class="px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">Update Store Details</button>
+                </form>
+            </section>
+
+            <!-- Manage Offers -->
+            <section id="offers" class="mb-16">
+                <h2 class="text-3xl font-bold mb-8">Manage Offers</h2>
+                <form id="offer-form" class="mb-8">
+                    <div class="mb-4">
+                        <label for="offerTitle" class="block text-lg font-bold mb-2">Offer Title</label>
+                        <input type="text" id="offerTitle" class="w-full p-3 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="offerImage" class="block text-lg font-bold mb-2">Image URL</label>
+                        <input type="text" id="offerImage" class="w-full p-3 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="offerValidUntil" class="block text-lg font-bold mb-2">Valid Until</label>
+                        <input type="date" id="offerValidUntil" class="w-full p-3 border border-gray-300 rounded-md" required>
+                    </div>
+                    <button type="submit" class="px-6 py-3 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition">Add Offer</button>
+                </form>
+                <div id="offers-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Offers will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <!-- Customer Reviews -->
+            <section id="reviews" class="mb-16">
+                <h2 class="text-3xl font-bold mb-8">Customer Reviews</h2>
+                <div id="reviews-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Reviews will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <!-- Advanced Analytics -->
+            <section id="advanced-analytics" class="mb-16">
+                <h2 class="text-3xl font-bold mb-8">Advanced Analytics</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Busiest Hours</h3>
+                        <p id="busiest-hours">N/A</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Top Selling Items</h3>
+                        <p id="top-items">N/A</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Customer Satisfaction</h3>
+                        <p id="satisfaction">N/A</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center clear-both">
+        <p>&copy; 2025 Super Mall. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/shop-owner.js"></script>
+</body>
+
+</html>

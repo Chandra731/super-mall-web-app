@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Super Mall - Detailed view of the store with offers and reviews.">
+    <meta name="keywords" content="Super Mall, Shopping, Store Details, Offers, Reviews">
+    <meta name="author" content="Super Mall Team">
+    <title>Store Details - Super Mall Web App</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Firebase (Optimized) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import firebaseConfig from "./js/firebase-config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+    </script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-semibold">Super Mall</h1>
+            <nav>
+                <ul class="flex space-x-4" id="auth-links">
+                    <li><a href="index.html" class="hover:underline">Home</a></li>
+                    <li><a href="mall.html" class="hover:underline">Mall</a></li>
+                    <li><a href="shop.html" class="hover:underline">Shops</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Store Header -->
+    <section id="store-header" class="relative h-64 bg-cover bg-center flex items-center text-center text-white">
+        <div class="bg-black bg-opacity-50 absolute inset-0"></div>
+        <div class="relative z-10 container mx-auto">
+            <img id="store-image" src="" alt="Store Image" class="w-32 h-32 rounded-full mx-auto">
+            <h2 id="store-name" class="text-4xl font-bold mb-2">Store Name</h2>
+            <p id="store-category" class="text-xl mb-2">Category</p>
+            <p id="store-rating" class="text-xl mb-2">⭐ Rating</p>
+            <span id="occupancy-status" class="text-lg mb-2">Occupancy</span>
+            <span id="followers-count" class="text-lg mb-2">Followers</span>
+            <button class="mt-4 px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">Follow</button>
+        </div>
+    </section>
+
+    <!-- Promotions & Special Offers -->
+    <section id="offers-section" class="py-16 bg-gray-200">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Promotions & Special Offers</h2>
+            <div class="carousel relative w-full max-w-3xl mx-auto overflow-hidden">
+                <div class="carousel-inner flex transition-transform duration-500 ease-in-out">
+                    <!-- Offers will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Reviews -->
+    <section id="reviews-section" class="py-16">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Customer Reviews</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Reviews will be dynamically loaded here -->
+            </div>
+            <form id="review-form" class="mt-8">
+                <h3 class="text-xl font-bold mb-4">Submit Your Review</h3>
+                <input type="text" id="review-user" class="p-3 w-full max-w-lg border border-gray-300 rounded-md shadow-md" placeholder="Your Name" required>
+                <input type="number" id="review-rating" class="p-3 w-full max-w-lg border border-gray-300 rounded-md shadow-md mt-4" placeholder="Rating (1-5)" required>
+                <textarea id="review-comment" class="p-3 w-full max-w-lg border border-gray-300 rounded-md shadow-md mt-4" placeholder="Your Review" required></textarea>
+                <button type="submit" class="mt-4 px-6 py-3 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition">Submit Review</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- AI-Powered Similar Store Recommendations -->
+    <section id="recommendations-section" class="py-16 bg-gray-200">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Similar Stores You May Like</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Recommendations will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>&copy; 2025 Super Mall. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/store-details.js"></script>
+</body>
+
+</html>

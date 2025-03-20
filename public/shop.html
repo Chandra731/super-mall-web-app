@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Super Mall - Discover shops on each floor.">
+    <meta name="keywords" content="Super Mall, Shopping, Shops, Floors">
+    <meta name="author" content="Super Mall Team">
+    <title>Shops - Super Mall Web App</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Firebase (Optimized) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import firebaseConfig from "./js/firebase-config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+    </script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-semibold">Super Mall</h1>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="index.html" class="hover:underline">Home</a></li>
+                    <li><a href="mall.html" class="hover:underline">Mall</a></li>
+                    <li><a href="shop.html" class="hover:underline">Shops</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-16">
+        <h2 class="text-3xl font-bold text-center mb-8">Shops on Selected Floor</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Shop 1 -->
+            <div class="shop-card bg-white shadow-md rounded-lg p-6 text-center">
+                <h3 class="text-xl font-bold mb-4">Shop Name 1</h3>
+                <p class="mb-4">Category: Electronics</p>
+                <p class="mb-4">Owner: John Doe</p>
+                <a href="shop-details.html?shop=shop1" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">Visit Shop</a>
+            </div>
+            <!-- Shop 2 -->
+            <div class="shop-card bg-white shadow-md rounded-lg p-6 text-center">
+                <h3 class="text-xl font-bold mb-4">Shop Name 2</h3>
+                <p class="mb-4">Category: Fashion</p>
+                <p class="mb-4">Owner: Jane Doe</p>
+                <a href="shop-details.html?shop=shop2" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">Visit Shop</a>
+            </div>
+            <!-- More shops as needed -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>&copy; 2025 Super Mall. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

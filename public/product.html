@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Super Mall - Product Management Page">
+    <meta name="keywords" content="Super Mall, Product Management">
+    <meta name="author" content="Super Mall Team">
+    <title>Product Management - Super Mall Web App</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-semibold">Super Mall</h1>
+            <nav>
+                <ul class="flex space-x-4" id="auth-links">
+                    <li><a href="index.html" class="hover:underline">Home</a></li>
+                    <li><a href="mall.html" class="hover:underline">Mall</a></li>
+                    <li><a href="shop.html" class="hover:underline">Shops</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mx-auto py-16">
+        <!-- Product Management Section -->
+        <section id="product-management" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 text-center">Product Management</h2>
+            <form id="product-form" class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
+                <div class="mb-4">
+                    <label for="shopName" class="block text-lg font-bold mb-2">Shop Name</label>
+                    <input type="text" id="shopName" class="w-full p-3 border border-gray-300 rounded-md" readonly>
+                </div>
+                <div class="mb-4">
+                    <label for="floor" class="block text-lg font-bold mb-2">Floor</label>
+                    <input type="number" id="floor" class="w-full p-3 border border-gray-300 rounded-md" readonly>
+                </div>
+                <div class="mb-4">
+                    <label for="mallLocation" class="block text-lg font-bold mb-2">Mall Location</label>
+                    <input type="text" id="mallLocation" class="w-full p-3 border border-gray-300 rounded-md" readonly>
+                </div>
+                <div class="mb-4">
+                    <label for="productName" class="block text-lg font-bold mb-2">Product Name</label>
+                    <input type="text" id="productName" class="w-full p-3 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="category" class="block text-lg font-bold mb-2">Category</label>
+                    <input type="text" id="category" class="w-full p-3 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="price" class="block text-lg font-bold mb-2">Price (₹)</label>
+                    <input type="number" id="price" class="w-full p-3 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="stock" class="block text-lg font-bold mb-2">Stock</label>
+                    <input type="number" id="stock" class="w-full p-3 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="description" class="block text-lg font-bold mb-2">Description</label>
+                    <textarea id="description" class="w-full p-3 border border-gray-300 rounded-md" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="imageURL" class="block text-lg font-bold mb-2">Image URL</label>
+                    <input type="text" id="imageURL" class="w-full p-3 border border-gray-300 rounded-md" required>
+                </div>
+                <button type="button" onclick="addProduct()" class="w-full px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">Add Product</button>
+            </form>
+        </section>
+
+        <!-- Product List Section -->
+        <section id="product-list" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 text-center">Product List</h2>
+            <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Products will be dynamically loaded here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>&copy; 2025 Super Mall. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/product.js"></script>
+</body>
+
+</html>

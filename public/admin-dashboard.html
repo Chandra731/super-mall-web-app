@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Super Mall - Admin Dashboard">
+    <meta name="keywords" content="Super Mall, Admin Dashboard">
+    <meta name="author" content="Super Mall Team">
+    <title>Admin Dashboard - Super Mall Web App</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-semibold">Super Mall</h1>
+            <nav>
+                <ul class="flex space-x-4" id="auth-links">
+                    <li><a href="index.html" class="hover:underline">Home</a></li>
+                    <li><a href="mall.html" class="hover:underline">Mall</a></li>
+                    <li><a href="shop.html" class="hover:underline">Shops</a></li>
+                    <li><a href="logout.html" class="hover:underline">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mx-auto py-16">
+        <!-- Product Approval Section -->
+        <section id="product-approval" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 text-center">Product Approval</h2>
+            <div id="pendingProducts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Pending products will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <!-- User Management Section -->
+        <section id="user-management" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 text-center">User Management</h2>
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr>
+                        <th class="py-2">Email</th>
+                        <th class="py-2">Role</th>
+                        <th class="py-2">Store Name</th>
+                        <th class="py-2">Status</th>
+                        <th class="py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userList">
+                    <!-- Users will be dynamically loaded here -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Mall Overview Section -->
+        <section id="mall-overview" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 text-center">Mall Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Mall overview content will be added here -->
+            </div>
+        </section>
+
+        <!-- Sales Reports & Analytics Section -->
+        <section id="sales-reports" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 text-center">Sales Reports & Analytics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4">Store Performance</h3>
+                    <canvas id="storePerformanceChart"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4">Floor-wise Analysis</h3>
+                    <canvas id="floorAnalysisChart"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-2">
+                    <h3 class="text-xl font-bold mb-4">Total Sales Report</h3>
+                    <canvas id="salesReportChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>&copy; 2025 Super Mall. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/admin-dashboard.js"></script>
+</body>
+
+</html>

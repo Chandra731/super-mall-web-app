@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Super Mall - Your one-stop shopping destination with top deals and stores.">
+    <meta name="keywords" content="Super Mall, Shopping, Deals, Stores">
+    <meta name="author" content="Super Mall Team">
+    <title>Super Mall Web App</title>
+    <script type="module">
+  // 🔥 Import Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // 🔥 Firebase Configuration (Replace with your own Firebase details)
+  const firebaseConfig = {
+  apiKey: "AIzaSyDhMt-tyTNIWowOMWjjAwhVvRK9MVzEtHg",
+  authDomain: "super-mall-web-app-f5a02.firebaseapp.com",
+  projectId: "super-mall-web-app-f5a02",
+  storageBucket: "super-mall-web-app-f5a02.firebasestorage.app",
+  messagingSenderId: "333180334350",
+  appId: "1:333180334350:web:e9970df600604c6bff675f",
+  measurementId: "G-Q6W5Z1280G"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+  // 🔹 Function to add all collections with data
+  async function addCollections() {
+    try {
+      // 🔹 USERS Collection (Customers & Shop Owners)
+      const usersData = [
+        { userId: "user001", name: "Amit Sharma", email: "amit@example.com", role: "customer" },
+        { userId: "user002", name: "Priya Verma", email: "priya@example.com", role: "customer" },
+        { userId: "user003", name: "Rahul Gupta", email: "rahul@example.com", role: "customer" },
+        { userId: "shop001", name: "Rajesh Kumar", email: "rajesh@shop.com", role: "shopOwner" },
+        { userId: "shop002", name: "Sneha Patel", email: "sneha@shop.com", role: "shopOwner" }
+      ];
+      usersData.forEach(user => addDoc(collection(db, "users"), user));
+
+      // 🔹 SHOP OWNERS Collection
+      const shopOwnersData = [
+        { shopId: "shop001", ownerId: "shop001", shopName: "Rajesh Footwear", floor: 1, categories: ["Shoes"] },
+        { shopId: "shop002", ownerId: "shop002", shopName: "Fashion Hub", floor: 2, categories: ["Clothing"] },
+        { shopId: "shop003", ownerId: "shop002", shopName: "Tech World", floor: 3, categories: ["Electronics"] },
+        { shopId: "shop004", ownerId: "shop001", shopName: "Home Decor", floor: 4, categories: ["Furniture"] },
+        { shopId: "shop005", ownerId: "shop002", shopName: "Toy Store", floor: 4, categories: ["Toys"] }
+      ];
+      shopOwnersData.forEach(owner => addDoc(collection(db, "shopOwners"), owner));
+
+      // 🔹 PRODUCTS Collection
+      const productsData = [
+        { productId: "p001", shopId: "shop001", name: "Nike Sneakers", price: 3999, category: "Shoes" },
+        { productId: "p002", shopId: "shop002", name: "Denim Jacket", price: 1999, category: "Clothing" },
+        { productId: "p003", shopId: "shop003", name: "Samsung Galaxy S23", price: 69999, category: "Electronics" },
+        { productId: "p004", shopId: "shop004", name: "Wooden Coffee Table", price: 4999, category: "Furniture" },
+        { productId: "p005", shopId: "shop005", name: "Lego Set", price: 1299, category: "Toys" }
+      ];
+      productsData.forEach(product => addDoc(collection(db, "products"), product));
+
+      // 🔹 CART Collection
+      const cartData = [
+        { cartId: "c001", userId: "user001", productId: "p001", quantity: 2 },
+        { cartId: "c002", userId: "user002", productId: "p002", quantity: 1 },
+        { cartId: "c003", userId: "user003", productId: "p003", quantity: 1 },
+        { cartId: "c004", userId: "user001", productId: "p004", quantity: 1 },
+        { cartId: "c005", userId: "user002", productId: "p005", quantity: 3 }
+      ];
+      cartData.forEach(cart => addDoc(collection(db, "cart"), cart));
+
+      // 🔹 ORDERS Collection
+      const ordersData = [
+        { orderId: "o001", userId: "user001", productId: "p001", quantity: 2, status: "Processing" },
+        { orderId: "o002", userId: "user002", productId: "p002", quantity: 1, status: "Shipped" },
+        { orderId: "o003", userId: "user003", productId: "p003", quantity: 1, status: "Delivered" },
+        { orderId: "o004", userId: "user001", productId: "p004", quantity: 1, status: "Pending" },
+        { orderId: "o005", userId: "user002", productId: "p005", quantity: 3, status: "Cancelled" }
+      ];
+      ordersData.forEach(order => addDoc(collection(db, "orders"), order));
+
+      // 🔹 CATEGORIES Collection
+      const categoriesData = [
+        { categoryId: "cat001", name: "Shoes" },
+        { categoryId: "cat002", name: "Clothing" },
+        { categoryId: "cat003", name: "Electronics" },
+        { categoryId: "cat004", name: "Furniture" },
+        { categoryId: "cat005", name: "Toys" }
+      ];
+      categoriesData.forEach(category => addDoc(collection(db, "categories"), category));
+
+      // 🔹 REVIEWS Collection
+      const reviewsData = [
+        { reviewId: "r001", productId: "p001", userId: "user001", rating: 5, comment: "Amazing shoes!" },
+        { reviewId: "r002", productId: "p002", userId: "user002", rating: 4, comment: "Nice fit." },
+        { reviewId: "r003", productId: "p003", userId: "user003", rating: 5, comment: "Best phone ever!" },
+        { reviewId: "r004", productId: "p004", userId: "user001", rating: 3, comment: "Decent quality." },
+        { reviewId: "r005", productId: "p005", userId: "user002", rating: 4, comment: "My kid loves it!" }
+      ];
+      reviewsData.forEach(review => addDoc(collection(db, "reviews"), review));
+
+      // 🔹 TRANSACTIONS Collection
+      const transactionsData = [
+        { transactionId: "t001", orderId: "o001", amount: 7998, status: "Completed" },
+        { transactionId: "t002", orderId: "o002", amount: 1999, status: "Completed" },
+        { transactionId: "t003", orderId: "o003", amount: 69999, status: "Completed" },
+        { transactionId: "t004", orderId: "o004", amount: 4999, status: "Pending" },
+        { transactionId: "t005", orderId: "o005", amount: 3897, status: "Refunded" }
+      ];
+      transactionsData.forEach(transaction => addDoc(collection(db, "transactions"), transaction));
+
+      // 🔹 ADMIN Collection (Only One Admin)
+      await addDoc(collection(db, "admin"), {
+        adminId: "admin001",
+        name: "Mall Admin",
+        email: "admin@mall.com",
+        password: "Admin@123",
+        role: "admin"
+      });
+
+      alert("🔥 All Collections Added Successfully!");
+    } catch (error) {
+      console.error("❌ Error Adding Collections:", error);
+    }
+  }
+
+  // 🔥 Call the function to add data
+  addCollections();
+</script>
+
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-semibold">Super Mall</h1>
+            <nav>
+                <ul class="flex space-x-4" id="auth-links">
+                    <li><a href="index.html" class="hover:underline">Home</a></li>
+                    <li><a href="mall.html" class="hover:underline">Mall</a></li>
+                    <li><a href="shop.html" class="hover:underline">Shops</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero-section" class="relative h-screen bg-cover bg-center flex items-center text-center text-white">
+        <div class="bg-black bg-opacity-50 absolute inset-0"></div>
+        <div class="relative z-10 container mx-auto">
+            <h2 id="hero-title" class="text-4xl font-bold mb-4">Welcome to Super Mall – Experience Luxury Shopping!</h2>
+            <p id="hero-subtitle" class="text-xl mb-8">Find everything you need, all in one place.</p>
+            <a href="mall.html" class="px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">
+                Explore by Floor
+            </a>
+        </div>
+    </section>
+
+    <!-- Featured Stores & Categories -->
+    <section id="featured-stores" class="py-16">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Featured Stores & Categories</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Stores will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Deals -->
+    <section id="deals-carousel" class="py-16 bg-gray-200">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Trending Deals</h2>
+            <div class="relative w-full max-w-3xl mx-auto overflow-hidden">
+                <div class="carousel relative">
+                    <div class="carousel-inner flex transition-transform duration-500 ease-in-out">
+                        <!-- Deals will be dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Floor Map -->
+    <section id="floor-section" class="py-16">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Explore by Floor</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Floors will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>&copy; 2025 Super Mall. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>
