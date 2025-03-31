@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Floor - SuperMall</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Firebase SDKs -->
+  <script type="module" src="js/floor.js"></script>
+</head>
+<body>
+  <header>
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">SuperMall</a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="logout">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <main class="container mt-5">
+    <h1>Select Floor</h1>
+    <form id="floor-selection-form">
+      <div class="form-group">
+        <label for="floor">Select Floor</label>
+        <select class="form-control" id="floor" required>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+          <option value="3">Floor 3</option>
+          <option value="4">Floor 4</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Get Shops</button>
+    </form>
+    <ul id="shop-list" class="list-group mt-3">
+      <!-- Shops will be listed here -->
+    </ul>
+  </main>
+  <footer class="footer mt-auto py-3 bg-light">
+    <div class="container">
+      <span class="text-muted">© 2025 SuperMall</span>
+    </div>
+  </footer>
+</body>
+</html>

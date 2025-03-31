@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Firebase SDKs -->
+  <script type="module" src="js/admin-dashboard.js"></script>
+</head>
+<body>
+  <header>
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">SuperMall</a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="admin-dashboard.html">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="logout">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <main class="container mt-5">
+    <h1>Admin Dashboard</h1>
+    <div>
+      <h2>Analytics</h2>
+      <p>User Login Count: <span id="user-login-count">0</span></p>
+      <p>Total Revenue: $<span id="total-revenue">0.00</span></p>
+    </div>
+    <div>
+      <h2>Pending Shop Approvals</h2>
+      <ul id="pending-shops" class="list-group">
+        <!-- Pending shops will be listed here -->
+      </ul>
+    </div>
+  </main>
+  <footer class="footer mt-auto py-3 bg-light">
+    <div class="container">
+      <span class="text-muted">© 2025 SuperMall</span>
+    </div>
+  </footer>
+</body>
+</html>

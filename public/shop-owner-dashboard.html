@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Owner Dashboard</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js"></script>
+
+  <script type="module" src="js/shop-owner-dashboard.js"></script>
+</head>
+<body>
+  <header>
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">SuperMall</a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="logout">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  
+  <main class="container mt-5">
+    <h1>Shop Owner Dashboard</h1>
+    
+    <form id="product-form" enctype="multipart/form-data">
+      <input type="hidden" id="product-id">
+      
+      <div class="form-group">
+        <label for="product-name">Product Name</label>
+        <input type="text" class="form-control" id="product-name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="product-price">Product Price</label>
+        <input type="number" class="form-control" id="product-price" required>
+      </div>
+
+      <div class="form-group">
+        <label for="product-description">Product Description</label>
+        <textarea class="form-control" id="product-description" rows="3" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="product-image">Product Image</label>
+        <input type="file" class="form-control" id="product-image" required>
+        <img id="product-image-preview" class="img-fluid" src="" alt="Product Image Preview">
+      </div>
+
+      <button type="submit" class="btn btn-primary">Add/Update Product</button>
+    </form>
+
+    <button id="delete-product" class="btn btn-danger mt-3">Delete Product</button>
+
+    <ul id="product-list" class="list-group mt-5">
+      <!-- Product list will be populated here -->
+    </ul>
+  </main>
+
+  <footer class="footer mt-auto py-3 bg-light">
+    <div class="container">
+      <span class="text-muted">© 2025 SuperMall</span>
+    </div>
+  </footer>
+</body>
+</html>
