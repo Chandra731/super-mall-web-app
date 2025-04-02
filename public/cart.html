@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop - SuperMall</title>
+  <title>Shopping Cart - SuperMall</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Firebase SDKs -->
-  <script type="module" src="js/shop.js"></script>
+  <script type="module" src="js/cart.js"></script>
 </head>
 <body>
   <header>
@@ -35,10 +35,13 @@
     </nav>
   </header>
   <main class="container mt-5">
-    <h1 id="shop-name">Shop Name</h1>
-    <ul id="product-list" class="list-group mt-3">
-      <!-- Products will be listed here -->
+    <h1>Shopping Cart</h1>
+    <ul id="cart-list" class="list-group mt-3">
+      <!-- Cart items will be listed here -->
     </ul>
+    <div class="mt-3">
+      <button id="checkout-button" class="btn btn-primary">Proceed to Checkout</button>
+    </div>
   </main>
   <footer class="footer mt-auto py-3 bg-light">
     <div class="container">

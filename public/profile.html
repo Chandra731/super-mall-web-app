@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop - SuperMall</title>
+  <title>User Profile - SuperMall</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Firebase SDKs -->
-  <script type="module" src="js/shop.js"></script>
+  <script type="module" src="js/profile.js"></script>
 </head>
 <body>
   <header>
@@ -25,7 +25,10 @@
             <a class="nav-link" href="cart.html">Cart</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="dashboard.html">Dashboard</a>
+            <a class="nav-link" href="orders.html">Orders</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="profile.html">Profile</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" id="logout">Logout</a>
@@ -35,10 +38,18 @@
     </nav>
   </header>
   <main class="container mt-5">
-    <h1 id="shop-name">Shop Name</h1>
-    <ul id="product-list" class="list-group mt-3">
-      <!-- Products will be listed here -->
-    </ul>
+    <h1>User Profile</h1>
+    <form id="profile-form">
+      <div class="form-group">
+        <label for="display-name">Display Name</label>
+        <input type="text" class="form-control" id="display-name" placeholder="Enter your display name">
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" class="form-control" id="email" placeholder="Enter your email" disabled>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
   </main>
   <footer class="footer mt-auto py-3 bg-light">
     <div class="container">

@@ -1,7 +1,7 @@
 // Import Firebase modules
 import { auth, db } from './firebase-config.js';
-import { signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
-import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+import { signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 // Initialize AOS animations
 AOS.init({
@@ -14,6 +14,7 @@ AOS.init({
 // DOM elements
 const greetingMessage = document.getElementById('greeting-message');
 const loginButton = document.getElementById('login-btn');
+const profileIcon = document.getElementById('profile-icon');
 const logoutButton = document.getElementById('logout-btn');
 const contactForm = document.getElementById('contact-form');
 
@@ -23,27 +24,29 @@ onAuthStateChanged(auth, (user) => {
         // User is logged in
         greetingMessage.innerHTML = `Welcome, <strong>${user.displayName || user.email}</strong>!`;
         greetingMessage.style.display = 'block';
-        logoutButton.style.display = 'block';
+        profileIcon.style.display = 'block';
         loginButton.style.display = 'none';
         contactForm.style.display = 'block';
     } else {
         // User is not logged in
         greetingMessage.innerHTML = '';
         greetingMessage.style.display = 'none';
-        logoutButton.style.display = 'none';
+        profileIcon.style.display = 'none';
         loginButton.style.display = 'block';
         contactForm.style.display = 'none';
     }
 });
 
 // Logout functionality
-function logout() {
-    signOut(auth).then(() => {
+logoutButton.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
         alert('You have been logged out.');
-    }).catch((error) => {
+        window.location.href = 'login.html';
+    } catch (error) {
         console.error('Logout error:', error.message);
-    });
-}
+    }
+});
 
 // Handle Contact Form Submission
 contactForm.addEventListener('submit', async function(event) {

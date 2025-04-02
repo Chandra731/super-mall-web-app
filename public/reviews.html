@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews - SuperMall</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Firebase SDKs -->
+  <script type="module" src="js/reviews.js"></script>
+</head>
+<body>
+  <header>
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">SuperMall</a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="floor.html">Floors</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="cart.html">Cart</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">Orders</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reviews.html">Reviews</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="profile.html">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="logout">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <main class="container mt-5">
+    <h1>Product Reviews</h1>
+    <div>
+      <form id="review-form">
+        <div class="form-group">
+          <label for="product-id">Product ID</label>
+          <input type="text" class="form-control" id="product-id" placeholder="Enter product ID">
+        </div>
+        <div class="form-group">
+          <label for="rating">Rating</label>
+          <select class="form-control" id="rating">
+            <option value="1">1 - Very Poor</option>
+            <option value="2">2 - Poor</option>
+            <option value="3">3 - Average</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="review">Review</label>
+          <textarea class="form-control" id="review" rows="3" placeholder="Write your review"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Review</button>
+      </form>
+    </div>
+    <ul id="review-list" class="list-group mt-3">
+      <!-- Reviews will be listed here -->
+    </ul>
+  </main>
+  <footer class="footer mt-auto py-3 bg-light">
+    <div class="container">
+      <span class="text-muted">© 2025 SuperMall</span>
+    </div>
+  </footer>
+</body>
+</html>

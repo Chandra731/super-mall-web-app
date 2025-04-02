@@ -19,7 +19,6 @@
     <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js">
     <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css">
-
     <link rel="stylesheet" href="css/index.css">
 </head>
 
@@ -48,8 +47,15 @@
                         <li class="nav-item" id="login-btn">
                             <a class="nav-link btn btn-primary text-white" href="login.html">Login</a>
                         </li>
-                        <li class="nav-item" id="logout-btn" style="display: none;">
-                            <a class="nav-link btn btn-danger text-white" href="#" onclick="logout()">Logout</a>
+                        <li class="nav-item dropdown" id="profile-icon" style="display: none;">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="images/profile-icon.png" alt="Profile Icon" width="30" height="30">
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                                <li><a class="dropdown-item" href="orders.html">Orders</a></li>
+                                <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item" id="greeting-message" style="display: none; color: #000; padding: 10px;">
                             <!-- Greeting message will be injected here -->
