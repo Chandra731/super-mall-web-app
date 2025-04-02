@@ -3,17 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop Owner Dashboard</title>
+  <title>Shop Owner Dashboard - SuperMall</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js"></script>
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script type="module" src="js/shop-owner-dashboard.js"></script>
+  <style>
+    .product-card {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 10px 0;
+    }
+    .product-card .card {
+      display: inline-block;
+      width: 300px;
+      margin-right: 10px;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -31,48 +42,134 @@
       </div>
     </nav>
   </header>
-  
   <main class="container mt-5">
     <h1>Shop Owner Dashboard</h1>
-    
-    <form id="product-form" enctype="multipart/form-data">
-      <input type="hidden" id="product-id">
-      
-      <div class="form-group">
-        <label for="product-name">Product Name</label>
-        <input type="text" class="form-control" id="product-name" required>
+    <section id="overview-metrics" class="row">
+      <div class="col-md-2">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Total Sales</h5>
+            <p class="card-text" id="total-sales">$0</p>
+            <p class="card-text text-success" id="sales-growth">+0%</p>
+          </div>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="product-price">Product Price</label>
-        <input type="number" class="form-control" id="product-price" required>
+      <div class="col-md-2">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Total Orders</h5>
+            <p class="card-text" id="total-orders">0</p>
+            <p class="card-text text-info" id="orders-status">Completed</p>
+          </div>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="product-description">Product Description</label>
-        <textarea class="form-control" id="product-description" rows="3" required></textarea>
+      <div class="col-md-2">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Revenue Generated</h5>
+            <p class="card-text" id="revenue-generated">$0</p>
+            <p class="card-text text-success" id="revenue-growth">+0%</p>
+          </div>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="product-image">Product Image</label>
-        <input type="file" class="form-control" id="product-image" required>
-        <img id="product-image-preview" class="img-fluid" src="" alt="Product Image Preview">
+      <div class="col-md-2">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Number of Customers</h5>
+            <p class="card-text" id="number-customers">0</p>
+            <p class="card-text text-primary" id="new-vs-returning">New</p>
+          </div>
+        </div>
       </div>
+      <div class="col-md-2">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Top Product</h5>
+            <p class="card-text" id="top-product-name">N/A</p>
+            <p class="card-text text-warning" id="top-product-sales">0 Sales</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <button type="submit" class="btn btn-primary">Add/Update Product</button>
-    </form>
+    <section id="visualized-analytics" class="row mt-5">
+      <div class="col-md-12">
+        <canvas id="analyticsChart"></canvas>
+      </div>
+    </section>
 
-    <button id="delete-product" class="btn btn-danger mt-3">Delete Product</button>
+    <section id="product-management" class="mt-5">
+      <h2>Product Management & Promotions</h2>
+      <form id="product-form" class="mt-3">
+        <input type="hidden" id="product-id">
+        <div class="form-group">
+          <label for="product-name">Product Name</label>
+          <input type="text" class="form-control" id="product-name" required>
+        </div>
+        <div class="form-group">
+          <label for="product-price">Price</label>
+          <input type="number" class="form-control" id="product-price" required>
+        </div>
+        <div class="form-group">
+          <label for="product-description">Description</label>
+          <textarea class="form-control" id="product-description" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="product-image">Product Image</label>
+          <input type="file" class="form-control" id="product-image" multiple required>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Product</button>
+      </form>
+      <div id="message" class="mt-3"></div>
+      <div class="product-card mt-3" id="product-image-preview-container"></div>
+      <ul id="product-list" class="list-group mt-3" data-aos="fade-up">
+        <!-- Products will be listed here -->
+      </ul>
+      <button id="delete-product" class="btn btn-danger mt-3">Delete Product</button>
 
-    <ul id="product-list" class="list-group mt-5">
-      <!-- Product list will be populated here -->
-    </ul>
+      <h2 class="mt-5">Special Offers</h2>
+      <form id="offer-form" class="mt-3">
+        <div class="form-group">
+          <label for="offer-name">Offer Name</label>
+          <input type="text" class="form-control" id="offer-name" required>
+        </div>
+        <div class="form-group">
+          <label for="offer-description">Description</label>
+          <textarea class="form-control" id="offer-description" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="offer-discount">Discount (%)</label>
+          <input type="number" class="form-control" id="offer-discount" required>
+        </div>
+        <div class="form-group">
+          <label for="offer-start-date">Start Date</label>
+          <input type="date" class="form-control" id="offer-start-date" required>
+        </div>
+        <div class="form-group">
+          <label for="offer-end-date">End Date</label>
+          <input type="date" class="form-control" id="offer-end-date" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Offer</button>
+      </form>
+      <div id="offer-list" class="list-group mt-3" data-aos="fade-up">
+        <!-- Offers will be listed here -->
+      </div>
+    </section>
+
+    <section id="orders" class="mt-5">
+      <h2>Orders</h2>
+      <div id="orders-container" class="row">
+        <!-- Orders will be listed here -->
+      </div>
+    </section>
   </main>
-
   <footer class="footer mt-auto py-3 bg-light">
     <div class="container">
       <span class="text-muted">© 2025 SuperMall</span>
     </div>
   </footer>
+  <script>
+    AOS.init();
+  </script>
 </body>
 </html>

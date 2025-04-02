@@ -3,11 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Admin Dashboard - SuperMall</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <!-- Firebase SDKs -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script type="module" src="js/admin-dashboard.js"></script>
+  <style>
+    .card {
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -19,9 +28,6 @@
             <a class="nav-link" href="index.html">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="admin-dashboard.html">Dashboard</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="#" id="logout">Logout</a>
           </li>
         </ul>
@@ -30,22 +36,74 @@
   </header>
   <main class="container mt-5">
     <h1>Admin Dashboard</h1>
-    <div>
-      <h2>Analytics</h2>
-      <p>User Login Count: <span id="user-login-count">0</span></p>
-      <p>Total Revenue: $<span id="total-revenue">0.00</span></p>
-    </div>
-    <div>
+    <section id="overview-metrics" class="row">
+      <div class="col-md-3">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Total Sales</h5>
+            <p class="card-text" id="total-sales">$0</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Total Orders</h5>
+            <p class="card-text" id="total-orders">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Total Revenue</h5>
+            <p class="card-text" id="total-revenue">$0</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center" data-aos="fade-up">
+          <div class="card-body">
+            <h5 class="card-title">Total Users</h5>
+            <p class="card-text" id="total-users">0</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="data-visualization" class="row mt-5">
+      <div class="col-md-6">
+        <canvas id="salesChart"></canvas>
+      </div>
+      <div class="col-md-6">
+        <canvas id="inventoryChart"></canvas>
+      </div>
+    </section>
+
+    <section id="shop-approvals" class="mt-5">
       <h2>Pending Shop Approvals</h2>
-      <ul id="pending-shops" class="list-group">
+      <div id="pending-shops" class="list-group">
         <!-- Pending shops will be listed here -->
-      </ul>
-    </div>
+      </div>
+    </section>
+
+    <section id="user-management" class="mt-5">
+      <h2>User Management</h2>
+      <!-- User management features go here -->
+    </section>
+
+    <section id="order-tracking" class="mt-5">
+      <h2>Order Tracking</h2>
+      <!-- Order tracking features go here -->
+    </section>
   </main>
   <footer class="footer mt-auto py-3 bg-light">
     <div class="container">
       <span class="text-muted">© 2025 SuperMall</span>
     </div>
   </footer>
+  <script>
+    AOS.init();
+  </script>
 </body>
 </html>

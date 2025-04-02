@@ -1,0 +1,125 @@
+body {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.header,
+.footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* Hero Section */
+.hero {
+  height: 100vh;
+  background: url('images/Shopping-Mall.jpg') no-repeat center center/cover;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  display: flex; /* Use flexbox for centering */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+}
+
+.navbar {
+  padding: 10px 0;
+}
+
+.navbar-brand img {
+  height: 50px;
+}
+
+.navbar-nav .nav-link {
+  font-size: 16px;
+  margin-right: 15px;
+}
+
+.navbar-nav .btn {
+  padding: 5px 15px;
+}
+
+.shops-section,
+.offers-section,
+.reviews-section,
+.contact-section {
+  padding: 2rem 0;
+}
+
+.shops-section h2,
+.offers-section h2,
+.reviews-section h2,
+.contact-section h2 {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.card-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.card {
+  margin-bottom: 1rem;
+  transition: transform 0.2s;
+  width: 100%; /* Adjusted for better responsiveness */
+  max-width: 300px; /* Set a max width for cards */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  max-width: 100%;
+  height: auto;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  font-size: 1rem;
+  color: #666;
+}
+
+.contact-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.contact-form .form-control {
+  padding: 0.5rem;
+  width: 50%;
+  max-width: 500px;
+  margin: auto;
+}
+
+.contact-form .btn {
+  align-items: center;
+  align-self: center;
+  width: 50%;
+  max-width: 200px;
+  margin: auto;
+}
+
+.footer {
+  background-color: #222; /* Darker footer for better contrast */
+  color: white;
+  text-align: center;
+  padding: 1.5rem 0; /* Increased padding for better spacing */
+}
+
+.footer p {
+  margin: 0;
+}

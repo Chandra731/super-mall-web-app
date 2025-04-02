@@ -10,7 +10,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve images
 
 // Ensure the upload directory exists
-const uploadDir = path.join(__dirname, 'uploads/shops');
+const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file limit
     fileFilter: (req, file, cb) => {
@@ -38,21 +38,30 @@ const upload = multer({
     }
 });
 
-// Route to handle image upload
-app.post('/upload', upload.single('shopImage'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+// Route to handle multiple image uploads
+app.post('/upload', upload.array('images', 5), (req, res) => {
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    // Generate image URL
-    const imageUrl = `http://localhost:5000/uploads/shops/${req.file.filename}`;
-    res.json({ imageUrl });
+    // Generate image URLs
+    const imageUrls = req.files.map(file => `http://localhost:5000/uploads/${file.filename}`);
+    res.json({ imageUrls });
 });
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
     console.error(err.message);
-    res.status(500).json({ error: err.message });
+    if (err instanceof multer.MulterError) {
+        // Handle Multer-specific errors
+        res.status(400).json({ error: err.message });
+    } else if (err.message === 'Only JPG, JPEG, and PNG files are allowed.') {
+        // Handle file type errors
+        res.status(400).json({ error: err.message });
+    } else {
+        // Handle other errors
+        res.status(500).json({ error: 'An internal server error occurred.' });
+    }
 });
 
 app.listen(5000, () => {
