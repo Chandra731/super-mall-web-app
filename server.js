@@ -7,6 +7,7 @@ const fs = require('fs');
 const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve images
 
 // Ensure the upload directory exists

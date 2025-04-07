@@ -1,55 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover the best shopping experience with exclusive deals and offers.">
-    <meta name="keywords" content="shopping, discounts, best deals, offers, stores">
-    <meta name="author" content="Your Company Name">
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Discover the best shopping experience with exclusive deals and offers." />
+    <meta name="keywords" content="shopping, discounts, best deals, offers, stores" />
+    <meta name="author" content="ShopEase" />
+
     <title>ShopEase - Best Shopping Experience</title>
 
-    <link rel="icon" type="image/png" href="favicon.png">
-    <!-- Bootstrap CSS (Place this in <head>) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-
-    <!-- Preload JavaScript for performance -->
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js">
-    <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css">
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" />
+    <link rel="stylesheet" href="css/index.css" />
 </head>
 
 <body>
-    <!-- 🌟 Header with Navigation -->
+    <!-- Header with Navigation -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
-                <!-- Logo -->
                 <a class="navbar-brand" href="index.html">
-                    <img src="images/logo.png" alt="ShopEase Logo" width="120" height="50">
+                    <img src="images/logo.png" alt="ShopEase Logo" width="120" height="50" />
                 </a>
-                <!-- Mobile Menu Button -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <!-- Navigation Links -->
                 <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                     <ul class="navbar-nav">
                         <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
                         <li class="nav-item"><a class="nav-link" href="#shops">Shops</a></li>
                         <li class="nav-item"><a class="nav-link" href="#offers">Offers</a></li>
                         <li class="nav-item"><a class="nav-link" href="#reviews">Reviews</a></li>
                         <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
                         <li class="nav-item" id="login-btn">
-                            <a class="nav-link btn btn-primary text-white" href="login.html">Login</a>
+                            <a class="nav-link btn btn-primary text-black" href="login.html">Login</a>
                         </li>
                         <li class="nav-item dropdown" id="profile-icon" style="display: none;">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="images/profile-icon.png" alt="Profile Icon" width="30" height="30">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="images/profile-icon.jpg" alt="Profile Icon" width="30" height="30" />
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="profile.html">Profile</a></li>
@@ -57,8 +49,8 @@
                                 <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item" id="greeting-message" style="display: none; color: #000; padding: 10px;">
-                            <!-- Greeting message will be injected here -->
+                        <li class="nav-item" id="greetingMessage" style="display: none; color: #000; padding: 10px;">
+                            <!-- Greeting message -->
                         </li>
                     </ul>
                 </div>
@@ -66,117 +58,135 @@
         </nav>
     </header>
 
-    <!-- 🌟 Hero Section -->
-    <section class="hero">
-        <div class="container text-center">
+<!-- Hero Section -->
+<!-- Hero Section -->
+    <section class="hero-section text-center py-5">
+        <div class="container">
             <h1>Discover Amazing Deals & Offers</h1>
             <p>Shop smarter with exclusive discounts from your favorite stores.</p>
             <a href="floor.html" class="btn btn-primary">Browse Shops</a>
         </div>
     </section>
 
-    <!-- 🌟 Featured Shops Section -->
+    <!-- About Us Section -->
+    <section id="about" class="about-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">About Us</h2>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <img src="images/about.jpg" alt="About ShopEase" class="img-fluid rounded shadow" />
+                </div>
+                <div class="col-md-6">
+                    <p>
+                        Welcome to <strong>ShopEase</strong> — your one-stop destination for a seamless shopping experience. 
+                        Our mission is to connect shoppers with top-rated stores, irresistible offers, and unmatched convenience. 
+                        Whether you're hunting for the latest trends, budget-friendly bargains, or trusted brands, 
+                        ShopEase is here to simplify your journey.
+                    </p>
+                    <p>
+                        With user-friendly navigation, real-time offers, and personalized recommendations, 
+                        we ensure shopping is not just easy — it's delightful. Join thousands of satisfied users and 
+                        experience shopping like never before.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shops Section -->
     <section id="shops" class="shops-section py-5">
         <div class="container">
             <h2 class="text-center mb-4">Our Shops</h2>
-            <div class="card-columns">
-                <div class="card">
-                    <img src="images/shop1.jpg" class="card-img-top" alt="Shop 1">
-                    <div class="card-body">
-                        <h5 class="card-title">Shop 1</h5>
-                        <p class="card-text">Find the latest fashion trends at Shop 1.</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="images/shop2.jpg" class="card-img-top" alt="Shop 2">
-                    <div class="card-body">
-                        <h5 class="card-title">Shop 2</h5>
-                        <p class="card-text">Discover a variety of electronics at Shop 2.</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="images/shop3.jpg" class="card-img-top" alt="Shop 3">
-                    <div class="card-body">
-                        <h5 class="card-title">Shop 3</h5>
-                        <p class="card-text">Get your groceries at the best prices from Shop 3.</p>
-                    </div>
-                </div>
+            <div class="row" id="featured-shops">
+                <!-- Featured shops will be injected here -->
             </div>
         </div>
     </section>
 
-    <!-- 🌟 Featured Offers Section -->
+    <!-- Offers Section -->
     <section id="offers" class="offers-section py-5 bg-light">
         <div class="container">
             <h2 class="text-center mb-4">Exclusive Offers</h2>
-            <div class="card-columns">
-                <div class="card">
-                    <img src="images/offer1.jpg" class="card-img-top" alt="Offer 1">
-                    <div class="card-body">
-                        <h5 class="card-title">Offer 1</h5>
-                        <p class="card-text">Get 50% off on select items at Shop 1.</p>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="images/offer1.jpg" class="card-img-top" alt="Offer 1" />
+                        <div class="card-body">
+                            <h5 class="card-title">Offer 1</h5>
+                            <p class="card-text">Get 50% off on select items at Shop 1.</p>
+                        </div>
                     </div>
                 </div>
-                <div class="card">
-                    <img src="images/offer2.jpg" class="card-img-top" alt="Offer 2">
-                    <div class="card-body">
-                        <h5 class="card-title">Offer 2</h5>
-                        <p class="card-text">Buy one get one free at Shop 2.</p>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="images/offer2.jpg" class="card-img-top" alt="Offer 2" />
+                        <div class="card-body">
+                            <h5 class="card-title">Offer 2</h5>
+                            <p class="card-text">Buy one get one free at Shop 2.</p>
+                        </div>
                     </div>
                 </div>
-                <div class="card">
-                    <img src="images/offer3.jpg" class="card-img-top" alt="Offer 3">
-                    <div class="card-body">
-                        <h5 class="card-title">Offer 3</h5>
-                        <p class="card-text">Save 20% on your first purchase at Shop 3.</p>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="images/offer3.jpg" class="card-img-top" alt="Offer 3" />
+                        <div class="card-body">
+                            <h5 class="card-title">Offer 3</h5>
+                            <p class="card-text">Save 20% on your first purchase at Shop 3.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 🌟 Reviews Section -->
+    <!-- Reviews Section -->
     <section id="reviews" class="reviews-section py-5">
         <div class="container">
             <h2 class="text-center mb-4">Customer Reviews</h2>
-            <div class="card-columns">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">John Doe</h5>
-                        <p class="card-text">⭐⭐⭐⭐⭐</p>
-                        <p class="card-text">"Amazing shopping experience! Will definitely visit again."</p>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">John Doe</h5>
+                            <p class="card-text">⭐⭐⭐⭐⭐</p>
+                            <p class="card-text">"Amazing shopping experience! Will definitely visit again."</p>
+                        </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Jane Smith</h5>
-                        <p class="card-text">⭐⭐⭐⭐</p>
-                        <p class="card-text">"Great variety of shops and excellent customer service."</p>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Jane Smith</h5>
+                            <p class="card-text">⭐⭐⭐⭐</p>
+                            <p class="card-text">"Great variety of shops and excellent customer service."</p>
+                        </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Michael Brown</h5>
-                        <p class="card-text">⭐⭐⭐⭐⭐</p>
-                        <p class="card-text">"Best deals and offers! Highly recommend ShopEase."</p>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Michael Brown</h5>
+                            <p class="card-text">⭐⭐⭐⭐⭐</p>
+                            <p class="card-text">"Best deals and offers! Highly recommend ShopEase."</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 🌟 Contact Section -->
+    <!-- Contact Section -->
     <section id="contact" class="contact-section py-5 bg-light">
         <div class="container">
             <h2 class="text-center mb-4">Contact Us</h2>
             <form class="contact-form" id="contact-form">
-                <div class="form-group">
-                    <input type="text" id="name" class="form-control" placeholder="Your Name" required>
+                <div class="mb-3">
+                    <input type="text" id="name" class="form-control" placeholder="Your Name" required />
                 </div>
-                <div class="form-group">
-                    <input type="email" id="email" class="form-control" placeholder="Your Email" required>
+                <div class="mb-3">
+                    <input type="email" id="email" class="form-control" placeholder="Your Email" required />
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <textarea id="message" class="form-control" placeholder="Your Message" required></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Send Message</button>
@@ -184,20 +194,17 @@
         </div>
     </section>
 
-    <!-- 🌟 Footer -->
+    <!-- Footer -->
     <footer class="footer py-3 bg-dark text-light">
         <div class="container text-center">
             <p>&copy; 2025 ShopEase. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Bootstrap JS Bundle -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- AOS Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js"></script>
-
-    <!-- Firebase and Main Script -->
-    <script src="js/firebase-config.js"></script>
-    <script src="js/index.js"></script>
+    <script type="module" crossorigin="anonymous" src="js/firebase-config.js"></script>
+    <script type="module" crossorigin="anonymous" src="js/index.js"></script>
 </body>
 </html>

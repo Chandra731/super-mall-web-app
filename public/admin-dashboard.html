@@ -11,6 +11,7 @@
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
   <script type="module" src="js/admin-dashboard.js"></script>
   <style>
     .card {
@@ -29,6 +30,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" id="logout">Logout</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn btn-primary text-white" href="#" id="select-shops-btn">Select Shops</a>
           </li>
         </ul>
       </div>
@@ -87,14 +91,18 @@
       </div>
     </section>
 
-    <section id="user-management" class="mt-5">
-      <h2>User Management</h2>
-      <!-- User management features go here -->
+    <section id="featured-shops" class="mt-5">
+      <h2>Featured Shops</h2>
+      <div id="featured-shops-list" class="list-group">
+        <!-- Featured shops will be listed here -->
+      </div>
     </section>
 
-    <section id="order-tracking" class="mt-5">
-      <h2>Order Tracking</h2>
-      <!-- Order tracking features go here -->
+    <section id="user-management" class="mt-5">
+      <h2>User Management</h2>
+      <div id="user-management-list" class="list-group">
+        <!-- User management features go here -->
+      </div>
     </section>
   </main>
   <footer class="footer mt-auto py-3 bg-light">
