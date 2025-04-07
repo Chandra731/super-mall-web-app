@@ -71,7 +71,7 @@ async function loadCartItems(userId) {
             <p class="mt-2">Item Total: $<span class="item-total">${itemTotal.toFixed(2)}</span></p>
             <button class="btn btn-sm btn-danger delete-btn mt-2" data-id="${cartItemId}">Delete</button>
           </div>
-          <img src="${product.productImageUrls[0]}" alt="${product.productName}" class="img-fluid" style="max-width: 200px;">
+          <img src="http://localhost:5000/uploads/${product.productImage}" alt="${product.productName}" class="img-fluid" style="max-width: 200px;">
         `;
         listItem.dataset.price = product.productPrice;
         listItem.dataset.productId = cartItem.productId;

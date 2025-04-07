@@ -52,5 +52,16 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if request.auth != null || request.method == 'GET';
     }
+
+    // 🔹 Users can create orders and read their own orders
+    match /orders/{orderId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && 
+                  request.auth.uid == resource.data.userId;
+      
+      // Admins can read all orders
+      allow read: if request.auth != null &&
+                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
   }
 }
