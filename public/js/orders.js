@@ -41,3 +41,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   });
 });
+
+  // Logout functionality
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        alert('You have been logged out.');
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error('Logout error:', error.message);
+      }
+    });
+  }
