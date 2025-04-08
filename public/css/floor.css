@@ -1,0 +1,12 @@
+.floor-card {
+    transition: transform 0.3s ease;
+}
+
+.floor-card:hover {
+    transform: translateY(-10px);
+}
+
+.floor-card img {
+    height: 200px;
+    object-fit: cover;
+}

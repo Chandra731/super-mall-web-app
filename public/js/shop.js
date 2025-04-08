@@ -1,77 +1,90 @@
-import { auth, db } from './firebase-config.js';
-import { signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-import { query, where, getDocs, collection, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+// shop.js
+import { db } from "./firebase.mjs";
+import {
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-document.addEventListener('DOMContentLoaded', async function () {
-  const productList = document.getElementById('product-list');
-  const urlParams = new URLSearchParams(window.location.search);
-  const shopId = urlParams.get('shopId');
+document.addEventListener("DOMContentLoaded", () => {
+  const shopId = localStorage.getItem("shopId");
+  const shopName = localStorage.getItem("shopName");
+  const productList = document.getElementById("product-list");
+  const searchInput = document.getElementById("search-input");
+  const minPriceInput = document.getElementById("min-price");
+  const maxPriceInput = document.getElementById("max-price");
 
-  if (!shopId) {
-    window.location.href = 'floor.html';
-    return;
+  if (shopName) {
+    document.getElementById("shop-name").textContent = shopName;
   }
 
-  try {
-    // Fetch products for the selected shop
-    const productQuery = query(collection(db, 'products'), where('shopId', '==', shopId));
-    const productSnapshot = await getDocs(productQuery);
-    if (productSnapshot.empty) {
-      console.log('No products found for the selected shop.');
+  async function fetchProducts() {
+    if (!shopId) {
+      console.error("No shopId found in localStorage");
+      return;
     }
-    productSnapshot.forEach(doc => {
-      const product = doc.data();
-      const listItem = document.createElement('li');
-      listItem.className = 'list-group-item';
-      listItem.innerHTML = `
-        <h4>${product.productName}</h4>
-        <p>Price: $${product.productPrice}</p>
-        <p>${product.productDescription}</p>
-        <img src="http://localhost:5000/uploads/${product.productImage}" alt="${product.productName}" class="img-fluid">
-        <button class="btn btn-primary add-to-cart" data-product-id="${doc.id}">Add to Cart</button>
-      `;
-      productList.appendChild(listItem);
-    });
 
-    // Add event listener to 'Add to Cart' buttons
-    document.querySelectorAll('.add-to-cart').forEach(button => {
-      button.addEventListener('click', async (e) => {
-        const productId = e.target.getAttribute('data-product-id');
-        await addToCart(productId);
+    try {
+      const q = query(collection(db, "products"), where("shopId", "==", shopId));
+      const querySnapshot = await getDocs(q);
+      const products = [];
+
+      querySnapshot.forEach((doc) => {
+        products.push({ id: doc.id, ...doc.data() });
       });
-    });
-  } catch (error) {
-    console.error('Error fetching products:', error);
-  }
 
-  document.getElementById('logout').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = 'login.html';
-  });
-
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = 'login.html';
+      displayProducts(products);
+    } catch (err) {
+      console.error("Error fetching products:", err);
     }
-  });
+  }
+
+  function displayProducts(products) {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    const minPrice = parseFloat(minPriceInput.value);
+    const maxPrice = parseFloat(maxPriceInput.value);
+
+    const filtered = products.filter(product => {
+      const nameMatch = product.productName.toLowerCase().includes(searchTerm);
+      const price = parseFloat(product.productPrice);
+      const minPass = isNaN(minPrice) || price >= minPrice;
+      const maxPass = isNaN(maxPrice) || price <= maxPrice;
+      return nameMatch && minPass && maxPass;
+    });
+
+    productList.innerHTML = "";
+
+    if (filtered.length === 0) {
+      const noData = document.createElement("li");
+      noData.className = "list-group-item text-center";
+      noData.textContent = "No products found.";
+      productList.appendChild(noData);
+      return;
+    }
+
+    filtered.forEach(product => {
+      const li = document.createElement("li");
+      li.className = "list-group-item";
+
+      li.innerHTML = `
+        <div class="d-flex align-items-center">
+          <img src="${product.productImageUrls?.[0] || 'https://via.placeholder.com/80'}" alt="${product.productName}" class="mr-3" style="width: 80px; height: 80px; object-fit: cover;">
+          <div>
+            <h5 class="mb-1">${product.productName}</h5>
+            <p class="mb-1">${product.productDescription}</p>
+            <strong>₹${product.productPrice}</strong>
+          </div>
+        </div>
+      `;
+
+      productList.appendChild(li);
+    });
+  }
+
+  searchInput.addEventListener("input", fetchProducts);
+  minPriceInput.addEventListener("input", fetchProducts);
+  maxPriceInput.addEventListener("input", fetchProducts);
+
+  fetchProducts();
 });
-
-async function addToCart(productId) {
-  const user = auth.currentUser;
-  if (!user) {
-    alert('Please log in to add items to your cart.');
-    return;
-  }
-
-  try {
-    const cartItemRef = doc(db, 'carts', user.uid, 'items', productId);
-    await setDoc(cartItemRef, {
-      productId,
-      quantity: 1,
-    }, { merge: true });
-    console.log('Product added to cart:', productId);
-    alert('Product added to cart successfully!');
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-  }
-}

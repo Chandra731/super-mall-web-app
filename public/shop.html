@@ -1,45 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shop - SuperMall</title>
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <!-- Firebase SDKs -->
-  <script type="module" src="js/shop.js"></script>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/main.css"/>
+
+  <!-- Firebase Config -->
+  <script type="module" src="js/shop.js" defer></script>
 </head>
 <body>
+  <!-- Navigation -->
   <header>
-    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <a class="navbar-brand" href="#">SuperMall</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="floor.html">Floors</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="cart.html">Cart</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="dashboard.html">Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" id="logout">Logout</a>
-          </li>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="floor.html">Floors</a></li>
+          <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" id="logout">Logout</a></li>
         </ul>
       </div>
     </nav>
   </header>
+
+  <!-- Main content -->
   <main class="container mt-5">
-    <h1 id="shop-name">Shop Name</h1>
+    <h1 id="shop-name">Shop</h1>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <input type="text" id="search-input" class="form-control" placeholder="Search by product name">
+      </div>
+      <div class="col-md-3">
+        <input type="number" id="min-price" class="form-control" placeholder="Min price">
+      </div>
+      <div class="col-md-3">
+        <input type="number" id="max-price" class="form-control" placeholder="Max price">
+      </div>
+    </div>
+
+    <!-- Product List -->
     <ul id="product-list" class="list-group mt-3">
-      <!-- Products will be listed here -->
+      <!-- Products will be dynamically injected here -->
     </ul>
   </main>
+
+  <!-- Footer -->
   <footer class="footer mt-auto py-3 bg-light">
     <div class="container">
       <span class="text-muted">© 2025 SuperMall</span>
