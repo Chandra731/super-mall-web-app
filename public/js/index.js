@@ -1,6 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 import { doc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   const greetingMessage = document.getElementById('greetingMessage');
@@ -70,17 +71,28 @@ onAuthStateChanged(auth, async (user) => {
   // Load featured shops
   async function loadFeaturedShops() {
     try {
-      const querySnapshot = await getDocs(collection(db, 'featuredShops'));
+      const featuredQuery = query(
+        collection(db, 'shops'),
+        where('featured', '==', true)
+      );
+  
+      const querySnapshot = await getDocs(featuredQuery);
       featuredShopsContainer.innerHTML = '';
+  
+      if (querySnapshot.empty) {
+        featuredShopsContainer.innerHTML = '<p>No featured shops at the moment.</p>';
+        return;
+      }
+  
       querySnapshot.forEach((doc) => {
         const shopData = doc.data();
         const shopCard = `
           <div class="col-md-4">
             <div class="card mb-4">
-              <img src="${shopData.image}" class="card-img-top" alt="${shopData.name}">
+              <img src="${shopData.shopImages}" class="card-img-top" alt="${shopData.shopName}">
               <div class="card-body">
-                <h5 class="card-title">${shopData.name}</h5>
-                <p class="card-text">${shopData.description}</p>
+                <h5 class="card-title">${shopData.shopName}</h5>
+                <p class="card-text">${shopData.shopDescription}</p>
               </div>
             </div>
           </div>
@@ -88,9 +100,10 @@ onAuthStateChanged(auth, async (user) => {
         featuredShopsContainer.insertAdjacentHTML('beforeend', shopCard);
       });
     } catch (error) {
-      console.error('Error loading featured shops:', error.message);
+      console.error('🔥 Error loading featured shops:', error.message);
     }
   }
+  
 
   loadFeaturedShops();
 

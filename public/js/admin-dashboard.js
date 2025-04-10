@@ -1,309 +1,239 @@
 import { auth, db } from './firebase-config.js';
 import { signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-import { doc, getDocs, getDoc, setDoc, deleteDoc, query, where, collection } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
-import 'chartjs-adapter-date-fns'; // Add this line to import the date adapter
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
+  console.log("Admin Dashboard Loaded");
+
+  // Metrics Section
+  await updateMetrics();
+
+  // Graphical Insights
   const salesChartCtx = document.getElementById('salesChart').getContext('2d');
-  const inventoryChartCtx = document.getElementById('inventoryChart').getContext('2d');
-  const selectShopsBtn = document.getElementById('select-shops-btn');
+  const revenueChartCtx = document.getElementById('revenueChart').getContext('2d');
+  renderLineChart(salesChartCtx, 'Sales Trends');
+  renderLineChart(revenueChartCtx, 'Revenue Trends');
 
-  // Fetch data for sales chart
-  const salesData = await fetchSalesData();
-  renderSalesChart(salesChartCtx, salesData);
-
-  // Fetch data for inventory chart
-  const inventoryData = await fetchInventoryData();
-  renderInventoryChart(inventoryChartCtx, inventoryData);
-
-  // Fetch and render pending shops
+  // Shop Approval System
   const pendingShops = await fetchPendingShops();
   renderPendingShops(pendingShops);
 
-  // Fetch and render users for user management
+  // Featured Shops System
+  const approvedShops = await fetchFeaturedShops();
+  renderFeaturedShops(approvedShops);
+
+  // User Management Section
   const users = await fetchUsers();
   renderUsers(users);
 
-  // Fetch and render featured shops
-  const featuredShops = await fetchFeaturedShops();
-  renderFeaturedShops(featuredShops);
-
-  // Handle authentication state changes
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = 'login.html';
-    }
+  // Logout Event
+  document.getElementById('logout').addEventListener('click', async () => {
+    await signOut(auth);
+    console.log("User logged out successfully");
+    window.location.href = 'login.html';
   });
-
-  // Logout functionality
-  const logoutBtn = document.getElementById('logout');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        await signOut(auth);
-        alert('You have been logged out.');
-        window.location.href = 'login.html';
-      } catch (error) {
-        console.error('Logout error:', error.message);
-      }
-    });
-  }
-
-  // Load shops and allow admin to select featured shops
-  async function loadShops() {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'shops'));
-      const featuredShopsList = document.getElementById('featured-shops-list');
-      featuredShopsList.innerHTML = '';
-      querySnapshot.forEach((doc) => {
-        const shopData = doc.data();
-        const shopItem = `
-          <div class="list-group-item">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h5>${shopData.shopName}</h5>
-                <p>${shopData.shopDescription}</p>
-              </div>
-              <button class="btn btn-primary select-shop-btn" data-id="${doc.id}">Select</button>
-            </div>
-          </div>
-        `;
-        featuredShopsList.insertAdjacentHTML('beforeend', shopItem);
-      });
-
-      document.querySelectorAll('.select-shop-btn').forEach(button => {
-        button.addEventListener('click', selectShop);
-      });
-    } catch (error) {
-      console.error('Error loading shops:', error.message);
-    }
-  }
-
-  async function selectShop(event) {
-    const shopId = event.target.getAttribute('data-id');
-    try {
-      const shopDoc = await getDoc(doc(db, 'shops', shopId));
-      if (shopDoc.exists()) {
-        await setDoc(doc(db, 'featuredShops', shopId), shopDoc.data());
-        alert('Shop selected as featured!');
-        // Refresh the list of featured shops
-        const featuredShops = await fetchFeaturedShops();
-        renderFeaturedShops(featuredShops);
-      }
-    } catch (error) {
-      console.error('Error selecting shop:', error.message);
-    }
-  }
-
-  if (selectShopsBtn) {
-    selectShopsBtn.addEventListener('click', loadShops);
-  }
 });
 
-async function fetchSalesData() {
+// Fetch and Update Metrics
+async function updateMetrics() {
   try {
-    const response = await fetch('/api/sales');
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    return data;
+    console.log("Fetching metrics...");
+
+    // Fetch shop count
+    const shopsSnapshot = await getDocs(collection(db, 'shops'));
+    const totalShops = shopsSnapshot.size;
+    document.getElementById('total-shops').textContent = totalShops;
+
+    // Fetch product count
+    const productsSnapshot = await getDocs(collection(db, 'products'));
+    const totalProducts = productsSnapshot.size;
+    document.getElementById('total-products').textContent = totalProducts;
+
+    // Fetch user count
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const totalUsers = usersSnapshot.size;
+    document.getElementById('total-users').textContent = totalUsers;
   } catch (error) {
-    console.error('Error fetching sales data:', error);
-    return [];
+    console.error('Error fetching metrics:', error);
   }
 }
 
-async function fetchInventoryData() {
-  try {
-    const response = await fetch('/api/inventory');
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching inventory data:', error);
-    return [];
-  }
-}
-
+// Fetch Pending Shops
 async function fetchPendingShops() {
   try {
     const q = query(collection(db, 'shops'), where('approved', '==', false));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('Error fetching pending shops:', error);
     return [];
   }
 }
 
-async function fetchUsers() {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'users'));
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    return [];
+// Render Pending Shops
+function renderPendingShops(shops) {
+  const container = document.getElementById('pending-shops');
+  container.innerHTML = '';
+  if (shops.length === 0) {
+    container.innerHTML = '<p>No pending shops for approval.</p>';
+    return;
   }
+  shops.forEach((shop) => {
+    const item = `
+      <div class="list-group-item">
+        <h5>${shop.shopName}</h5>
+        <p>${shop.shopDescription}</p>
+        <button class="btn btn-success" onclick="approveShop('${shop.id}')">Approve</button>
+        <button class="btn btn-danger" onclick="rejectShop('${shop.id}')">Reject</button>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', item);
+  });
 }
 
+// Approve Shop
+window.approveShop = async function (shopId) {
+  try {
+    const shopRef = doc(db, 'shops', shopId);
+    await updateDoc(shopRef, { approved: true });
+    alert('Shop approved!');
+    const pendingShops = await fetchPendingShops();
+    renderPendingShops(pendingShops);
+    const approvedShops = await fetchFeaturedShops();
+    renderFeaturedShops(approvedShops);
+  } catch (error) {
+    console.error('Error approving shop:', error);
+  }
+};
+
+// Reject Shop
+window.rejectShop = async function (shopId) {
+  try {
+    const shopRef = doc(db, 'shops', shopId);
+    await deleteDoc(shopRef);
+    alert('Shop rejected!');
+    const pendingShops = await fetchPendingShops();
+    renderPendingShops(pendingShops);
+  } catch (error) {
+    console.error('Error rejecting shop:', error);
+  }
+};
+
+// Fetch Approved Shops (for Featured Section)
 async function fetchFeaturedShops() {
   try {
-    const querySnapshot = await getDocs(collection(db, 'featuredShops'));
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const q = query(collection(db, 'shops'), where('approved', '==', true));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('Error fetching featured shops:', error);
     return [];
   }
 }
 
-function renderSalesChart(ctx, data) {
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map(item => item.date),
-      datasets: [{
-        label: 'Sales',
-        data: data.map(item => item.sales),
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        fill: true,
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day'
-          }
-        },
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-}
-
-function renderInventoryChart(ctx, data) {
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.map(item => item.productName),
-      datasets: [{
-        label: 'Inventory',
-        data: data.map(item => item.stock),
-        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          beginAtZero: true
-        },
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-}
-
-function renderPendingShops(shops) {
-  const container = document.getElementById('pending-shops');
+// Render Featured Shops
+function renderFeaturedShops(shops) {
+  const container = document.getElementById('featured-shops');
   container.innerHTML = '';
-  shops.forEach(shop => {
-    const listItem = document.createElement('div');
-    listItem.className = 'list-group-item';
-    listItem.innerHTML = `
-      <h5>${shop.name}</h5>
-      <p>${shop.description}</p>
-      <button class="btn btn-success" onclick="approveShop('${shop.id}')">Approve</button>
-      <button class="btn btn-danger" onclick="rejectShop('${shop.id}')">Reject</button>
-    `;
-    container.appendChild(listItem);
+  if (shops.length === 0) {
+    container.innerHTML = '<p>No approved shops available to feature.</p>';
+    return;
+  }
+
+  shops.forEach((shop) => {
+    const isFeatured = shop.featured === true;
+    const item = `
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <h5>${shop.shopName}</h5>
+          <p>${shop.shopDescription || ''}</p>
+        </div>
+        <button class="btn ${isFeatured ? 'btn-warning' : 'btn-primary'}" onclick="toggleFeaturedShop('${shop.id}', ${isFeatured})">
+          ${isFeatured ? 'Unfeature' : 'Feature'}
+        </button>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', item);
   });
 }
 
+// Toggle Featured Shop
+window.toggleFeaturedShop = async function (shopId, currentlyFeatured) {
+  try {
+    const shopRef = doc(db, 'shops', shopId);
+    await updateDoc(shopRef, { featured: !currentlyFeatured });
+    alert(`Shop ${currentlyFeatured ? 'unfeatured' : 'featured'} successfully!`);
+    const approvedShops = await fetchFeaturedShops();
+    renderFeaturedShops(approvedShops);
+  } catch (error) {
+    console.error('Error toggling featured status:', error);
+  }
+};
+
+// Fetch Users
+async function fetchUsers() {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'users'));
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+}
+
+// Render Users
 function renderUsers(users) {
   const container = document.getElementById('user-management-list');
   container.innerHTML = '';
-  users.forEach(user => {
-    const listItem = document.createElement('div');
-    listItem.className = 'list-group-item';
-    listItem.innerHTML = `
-      <h5>${user.email}</h5>
-      <p>Role: ${user.role}</p>
-      <button class="btn btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
-    `;
-    container.appendChild(listItem);
+  if (users.length === 0) {
+    container.innerHTML = '<p>No users available.</p>';
+    return;
+  }
+  users.forEach((user) => {
+    const item = `
+      <div class="list-group-item">
+        <h5>${user.email}</h5>
+        <p>Role: ${user.role || 'N/A'}</p>
+        <button class="btn btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', item);
   });
 }
 
-function renderFeaturedShops(shops) {
-  const container = document.getElementById('featured-shops-list');
-  container.innerHTML = '';
-  shops.forEach(shop => {
-    const listItem = document.createElement('div');
-    listItem.className = 'list-group-item';
-    listItem.innerHTML = `
-      <h5>${shop.name}</h5>
-      <p>${shop.description}</p>
-    `;
-    container.appendChild(listItem);
-  });
-}
-
-async function approveShop(shopId) {
-  try {
-    const shopRef = doc(db, 'shops', shopId);
-    await updateDoc(shopRef, { approved: true });
-    // Refresh the list of pending shops
-    const pendingShops = await fetchPendingShops();
-    renderPendingShops(pendingShops);
-  } catch (error) {
-    console.error('Error approving shop:', error);
-  }
-}
-
-async function rejectShop(shopId) {
-  try {
-    const shopRef = doc(db, 'shops', shopId);
-    await deleteDoc(shopRef);
-    // Refresh the list of pending shops
-    const pendingShops = await fetchPendingShops();
-    renderPendingShops(pendingShops);
-  } catch (error) {
-    console.error('Error rejecting shop:', error);
-  }
-}
-
-async function deleteUser(userId) {
+// Delete User
+window.deleteUser = async function (userId) {
   try {
     const userRef = doc(db, 'users', userId);
     await deleteDoc(userRef);
-    // Refresh the list of users
+    alert('User deleted!');
     const users = await fetchUsers();
     renderUsers(users);
   } catch (error) {
     console.error('Error deleting user:', error);
   }
+};
+
+// Render Line Chart
+function renderLineChart(ctx, label) {
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['January', 'February', 'March', 'April'],
+      datasets: [
+        {
+          label,
+          data: [10, 20, 30, 40],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        },
+      ],
+    },
+    options: { responsive: true },
+  });
 }
-
-document.getElementById('logout').addEventListener('click', async () => {
-  await signOut(auth);
-  window.location.href = 'login.html';
-});
-
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = 'login.html';
-  }
-});

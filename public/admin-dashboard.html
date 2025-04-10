@@ -1,117 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - SuperMall</title>
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard | SuperMall</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://d3js.org/d3.v6.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-  <script type="module" src="js/admin-dashboard.js"></script>
+  <!-- Chart.js core -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Date adapter for Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
   <style>
-    .card {
+
+    .section-title {
+      margin-top: 40px;
       margin-bottom: 20px;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+    }
+    .spinner {
+      text-align: center;
+      margin: 2rem 0;
     }
   </style>
 </head>
 <body>
-  <header>
-    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">SuperMall</a>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" id="logout">Logout</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link btn btn-primary text-white" href="#" id="select-shops-btn">Select Shops</a>
-          </li>
-        </ul>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>Admin Dashboard</h2>
+      <div>
+        <a href="admin-profile.html" class="btn btn-primary mr-2">
+          <i class="fas fa-user"></i> My Profile
+        </a>
+        <button class="btn btn-danger" id="logout">Logout</button>
       </div>
-    </nav>
-  </header>
-  <main class="container mt-5">
-    <h1>Admin Dashboard</h1>
-    <section id="overview-metrics" class="row">
-      <div class="col-md-3">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Total Sales</h5>
-            <p class="card-text" id="total-sales">$0</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Total Orders</h5>
-            <p class="card-text" id="total-orders">0</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Total Revenue</h5>
-            <p class="card-text" id="total-revenue">$0</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Total Users</h5>
-            <p class="card-text" id="total-users">0</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
 
-    <section id="data-visualization" class="row mt-5">
+    <!-- Metrics -->
+    <div class="section-title">Quick Metrics</div>
+    <div class="row text-center" id="metrics">
+      <div class="col-md-4">
+        <h5>Total Shops</h5>
+        <p id="total-shops">Loading...</p>
+      </div>
+      <div class="col-md-4">
+        <h5>Total Products</h5>
+        <p id="total-products">Loading...</p>
+      </div>
+      <div class="col-md-4">
+        <h5>Total Users</h5>
+        <p id="total-users">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Sales and Revenue Charts -->
+    <div class="section-title">Insights</div>
+    <div class="row">
       <div class="col-md-6">
+        <h5>Sales Trends</h5>
         <canvas id="salesChart"></canvas>
       </div>
       <div class="col-md-6">
-        <canvas id="inventoryChart"></canvas>
+        <h5>Revenue Trends</h5>
+        <canvas id="revenueChart"></canvas>
       </div>
-    </section>
-
-    <section id="shop-approvals" class="mt-5">
-      <h2>Pending Shop Approvals</h2>
-      <div id="pending-shops" class="list-group">
-        <!-- Pending shops will be listed here -->
-      </div>
-    </section>
-
-    <section id="featured-shops" class="mt-5">
-      <h2>Featured Shops</h2>
-      <div id="featured-shops-list" class="list-group">
-        <!-- Featured shops will be listed here -->
-      </div>
-    </section>
-
-    <section id="user-management" class="mt-5">
-      <h2>User Management</h2>
-      <div id="user-management-list" class="list-group">
-        <!-- User management features go here -->
-      </div>
-    </section>
-  </main>
-  <footer class="footer mt-auto py-3 bg-light">
-    <div class="container">
-      <span class="text-muted">© 2025 SuperMall</span>
     </div>
-  </footer>
-  <script>
-    AOS.init();
-  </script>
+
+    <!-- Pending Shop Approvals -->
+    <div class="section-title">Pending Shop Approvals</div>
+    <div id="pending-shops">
+      <div class="spinner">Loading pending shops...</div>
+    </div>
+
+    <!-- Featured Shops Section -->
+    <div class="section-title">Featured Shops</div>
+    <div id="featured-shops">
+      <div class="spinner">Loading featured shops...</div>
+    </div>
+
+    <!-- User Management -->
+    <div class="section-title">User Management</div>
+    <div id="user-management-list">
+      <div class="spinner">Loading users...</div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>

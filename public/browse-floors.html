@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Floors - Super Mall</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .floor-card {
+      cursor: pointer;
+      transition: transform 0.3s;
+      height: 100%;
+    }
+    .floor-card:hover {
+      transform: translateY(-5px);
+    }
+    .shop-card {
+      margin-bottom: 20px;
+    }
+    .shop-logo {
+      max-height: 100px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <h1 class="text-center mb-4">Browse Floors</h1>
+    
+    <!-- Floor Selection -->
+    <div class="row g-4" id="floor-selection">
+      <div class="col-md-3">
+        <div class="card floor-card" data-floor="ground">
+          <div class="card-body text-center">
+            <h3>Ground Floor</h3>
+            <p>Fashion & Accessories</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card floor-card" data-floor="first">
+          <div class="card-body text-center">
+            <h3>First Floor</h3>
+            <p>Electronics & Gadgets</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card floor-card" data-floor="second">
+          <div class="card-body text-center">
+            <h3>Second Floor</h3>
+            <p>Food Court</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card floor-card" data-floor="third">
+          <div class="card-body text-center">
+            <h3>Third Floor</h3>
+            <p>Services & Entertainment</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shops Container -->
+    <div id="shops-container" class="mt-5" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 id="floor-title"></h2>
+        <button class="btn btn-outline-secondary" id="back-to-floors">Back to Floors</button>
+      </div>
+      <div class="row g-4" id="shops-list"></div>
+    </div>
+  </div>
+
+  <!-- Shop Details Modal -->
+  <div class="modal fade" id="shopDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="shopDetailsModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="shopDetailsContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="js/browse-floors.js"></script>
+</body>
+</html>

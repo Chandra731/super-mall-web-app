@@ -5,66 +5,101 @@ const cors = require('cors');
 const fs = require('fs');
 
 const app = express();
-app.use(cors({ origin: '*' }));
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve images
+const PORT = 5000;
 
-// Ensure the upload directory exists
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Upload folders
+const uploadDirs = {
+  shops: 'uploads/shop-images/',
+  profile: 'uploads/profile-images/',
+  products: 'uploads/product-images/'
+};
 
-// Configure Multer storage
+// Ensure upload directories exist
+Object.values(uploadDirs).forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+// Multer setup
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
+  destination: (req, file, cb) => {
+    if (req.originalUrl.includes('shop')) cb(null, uploadDirs.shops);
+    else if (req.originalUrl.includes('profile')) cb(null, uploadDirs.profile);
+    else if (req.originalUrl.includes('product')) cb(null, uploadDirs.products);
+    else cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueName + path.extname(file.originalname));
+  }
 });
 
 const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file limit
-    fileFilter: (req, file, cb) => {
-        const allowedExtensions = ['.jpg', '.jpeg', '.png'];
-        if (!allowedExtensions.includes(path.extname(file.originalname).toLowerCase())) {
-            return cb(new Error('Only JPG, JPEG, and PNG files are allowed.'));
-        }
-        cb(null, true);
-    }
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed!'), false);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Route to handle multiple image uploads
-app.post('/upload', upload.array('images', 5), (req, res) => {
+// CORS setup
+app.use(cors({
+  origin: '*', // Or 'http://localhost:3000'
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
+app.use(express.json());
+
+// ⚠️ Place static after routes
+// But expose uploaded images
+app.use('/uploads', express.static('uploads'));
+
+// ✅ SHOP IMAGE UPLOAD API
+app.post('/upload/shop-images', upload.array('shopImages', 5), (req, res) => {
+  try {
     if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ error: 'No files uploaded' });
+      return res.status(400).json({ message: 'No images uploaded' });
     }
 
-    // Generate image URLs
-    const imageUrls = req.files.map(file => `http://localhost:5000/uploads/${file.filename}`);
+    const imageUrls = req.files.map(file => `http://localhost:${PORT}/uploads/shop-images/${file.filename}`);
     res.json({ imageUrls });
+  } catch (err) {
+    console.error('Shop image upload error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
-// Error Handling Middleware
+// Profile Image
+app.post('/upload/profile-images', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
+  const imageUrl = `http://localhost:${PORT}/uploads/profile-images/${req.file.filename}`;
+  return res.status(200).json({ imageUrl });
+});
+
+// Product Images
+app.post('/upload/product-images', upload.array('images', 10), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No images uploaded' });
+  }
+  const imageUrls = req.files.map(file => `http://localhost:${PORT}/uploads/product-images/${file.filename}`);
+  return res.status(200).json({ imageUrls });
+});
+
+// 404 Fallback for unmatched API routes
+app.use('/upload', (req, res) => {
+  res.status(404).json({ message: 'Upload route not found' });
+});
+
+// Catch-all for any other errors
 app.use((err, req, res, next) => {
-    console.error(err.message);
-    if (err instanceof multer.MulterError) {
-        // Handle Multer-specific errors
-        res.status(400).json({ error: err.message });
-    } else if (err.message === 'Only JPG, JPEG, and PNG files are allowed.') {
-        // Handle file type errors
-        res.status(400).json({ error: err.message });
-    } else {
-        // Handle other errors
-        res.status(500).json({ error: 'An internal server error occurred.' });
-    }
+  console.error('Unhandled error:', err);
+  res.status(500).json({ message: err.message || 'Server error' });
 });
 
-app.listen(5000, () => {
-    console.log('Server is running on port 5000');
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

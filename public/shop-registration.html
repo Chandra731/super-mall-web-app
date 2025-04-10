@@ -4,60 +4,209 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shop Registration - SuperMall</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <!-- Firebase SDKs -->
-  <script type="module" src="js/shop-registration.js"></script>
+  <style>
+    .registration-card {
+      max-width: 800px;
+      margin: 2rem auto;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .form-section {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+    .form-section-title {
+      color: #4361ee;
+      margin-bottom: 1.5rem;
+    }
+    .image-preview {
+      max-width: 150px;
+      max-height: 150px;
+      margin: 0.5rem;
+      border-radius: 4px;
+    }
+    #image-preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">SuperMall</a>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" id="logout">Logout</a>
-          </li>
-        </ul>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">SuperMall</a>
+        <div class="collapse navbar-collapse">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+          </ul>
+          <div class="d-flex">
+            <a href="#" id="logout" class="btn btn-outline-danger">Logout</a>
+          </div>
+        </div>
       </div>
     </nav>
   </header>
-  <main class="container mt-5">
-    <h1>Shop Registration</h1>
-    <form id="shop-registration-form">
-      <div class="form-group">
-        <label for="shop-name">Shop Name</label>
-        <input type="text" class="form-control" id="shop-name" required>
+
+  <main class="container my-5">
+    <div class="card registration-card">
+      <div class="card-body p-4">
+        <h1 class="text-center mb-4">Shop Registration</h1>
+        
+        <form id="shop-registration-form" enctype="multipart/form-data">
+          <!-- Basic Information Section -->
+          <div class="form-section">
+            <h3 class="form-section-title">Basic Information</h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="shop-name" class="form-label">Shop Name *</label>
+                <input type="text" class="form-control" id="shop-name" required>
+              </div>
+              <div class="col-md-6">
+                <label for="shop-category" class="form-label">Category *</label>
+                <select class="form-select" id="shop-category" required>
+                  <option value="">Select Category</option>
+                  <option value="fashion">Fashion & Apparel</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="food">Food & Beverage</option>
+                  <option value="services">Services</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label for="shop-description" class="form-label">Description *</label>
+                <textarea class="form-control" id="shop-description" rows="3" required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location Information -->
+          <div class="form-section">
+            <h3 class="form-section-title">Location Details</h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="shop-floor" class="form-label">Floor *</label>
+                <select class="form-select" id="shop-floor" required>
+                  <option value="">Select Floor</option>
+                  <option value="ground">Ground Floor</option>
+                  <option value="first">First Floor</option>
+                  <option value="second">Second Floor</option>
+                  <option value="third">Third Floor</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="shop-number" class="form-label">Shop Number *</label>
+                <input type="text" class="form-control" id="shop-number" required>
+              </div>
+              <div class="col-12">
+                <label for="shop-address" class="form-label">Full Address *</label>
+                <textarea class="form-control" id="shop-address" rows="2" required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="form-section">
+            <h3 class="form-section-title">Contact Information</h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="shop-email" class="form-label">Email *</label>
+                <input type="email" class="form-control" id="shop-email" required>
+              </div>
+              <div class="col-md-6">
+                <label for="shop-phone" class="form-label">Phone *</label>
+                <input type="tel" class="form-control" id="shop-phone" required>
+              </div>
+              <div class="col-md-6">
+                <label for="owner-name" class="form-label">Owner Name *</label>
+                <input type="text" class="form-control" id="owner-name" required>
+              </div>
+              <div class="col-md-6">
+                <label for="owner-id" class="form-label">Owner ID Number *</label>
+                <input type="text" class="form-control" id="owner-id" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Business Hours -->
+          <div class="form-section">
+            <h3 class="form-section-title">Business Hours</h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="opening-time" class="form-label">Opening Time *</label>
+                <input type="time" class="form-control" id="opening-time" value="09:00" required>
+              </div>
+              <div class="col-md-6">
+                <label for="closing-time" class="form-label">Closing Time *</label>
+                <input type="time" class="form-control" id="closing-time" value="21:00" required>
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="open-weekends" checked>
+                  <label class="form-check-label" for="open-weekends">Open on Weekends</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Images Section -->
+          <div class="form-section">
+            <h3 class="form-section-title">Shop Images</h3>
+            <div class="mb-3">
+              <label for="shopImages" class="form-label">Upload Images (Max 5) *</label>
+              <input type="file" class="form-control" id="shopImages" multiple accept="image/*" required>
+              <div class="form-text">Upload clear images of your shop (logo, interior, products)</div>
+            </div>
+            <div id="image-preview-container"></div>
+          </div>
+
+          <!-- Terms and Submit -->
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="terms-agreement" required>
+            <label class="form-check-label" for="terms-agreement">
+              I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> *
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-3">
+            <span id="submit-text">Register Shop</span>
+            <span id="submit-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+          </button>
+        </form>
       </div>
-      <div class="form-group">
-        <label for="shop-description">Description</label>
-        <textarea class="form-control" id="shop-description" rows="3" required></textarea>
-      </div>
-      <div class="form-group">
-        <label for="shop-floor">Designated Floor</label>
-        <select class="form-control" id="shop-floor" required>
-          <option value="1">Floor 1</option>
-          <option value="2">Floor 2</option>
-          <option value="3">Floor 3</option>
-          <option value="4">Floor 4</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="shop-images">Shop Images</label>
-        <input type="file" class="form-control" id="shop-images" multiple required>
-      </div>
-      <button type="submit" class="btn btn-primary">Register Shop</button>
-    </form>
-    <div id="message" class="mt-3"></div>
-    <div id="shop-image-preview-container"></div>
+    </div>
   </main>
+
+  <!-- Terms Modal -->
+  <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Terms and Conditions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>By registering your shop, you agree to comply with all mall policies and regulations...</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer mt-auto py-3 bg-light">
-    <div class="container">
-      <span class="text-muted">© 2025 SuperMall</span>
+    <div class="container text-center">
+      <span class="text-muted">© 2025 SuperMall. All rights reserved.</span>
     </div>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="js/shop-registration.js"></script>
 </body>
 </html>

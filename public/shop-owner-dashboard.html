@@ -3,173 +3,355 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop Owner Dashboard - SuperMall</title>
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://d3js.org/d3.v6.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-  <script type="module" src="js/shop-owner-dashboard.js"></script>
+  <meta name="description" content="Shop owner dashboard for managing products, orders and promotions">
+  <title>Super Mall - Shop Owner Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <style>
-    .product-card {
-      display: flex;
-      overflow-x: auto;
-      white-space: nowrap;
-      padding: 10px 0;
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
     }
-    .product-card .card {
-      display: inline-block;
-      width: 300px;
-      margin-right: 10px;
+    
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .navbar {
+      background: linear-gradient(to right, var(--primary), var(--secondary)) !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.9);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+    
+    .section-title h4 {
+      color: var(--secondary);
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    .section-title h4:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: var(--primary);
+    }
+    
+    .product-img {
+      max-width: 100px;
+      border-radius: 5px;
+      transition: transform 0.3s ease;
+    }
+    
+    .product-img:hover {
+      transform: scale(1.05);
+    }
+    
+    form {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .form-control {
+      border-radius: 5px;
+      border: 1px solid #e0e0e0;
+      padding: 10px 15px;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      border: none;
+      padding: 10px 25px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    table {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    th {
+      background: var(--primary) !important;
+      color: white !important;
+    }
+    
+    .modal-lg {
+      max-width: 90%;
+    }
+    
+    .nav-link {
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+      transform: translateY(-2px);
     }
   </style>
 </head>
-<body>
-  <header>
-    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">SuperMall</a>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" id="logout">Logout</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-  </header>
-  <main class="container mt-5">
-    <h1>Shop Owner Dashboard</h1>
-    <section id="overview-metrics" class="row">
-      <div class="col-md-2">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Total Sales</h5>
-            <p class="card-text" id="total-sales">$0</p>
-            <p class="card-text text-success" id="sales-growth">+0%</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Total Orders</h5>
-            <p class="card-text" id="total-orders">0</p>
-            <p class="card-text text-info" id="orders-status">Completed</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Revenue Generated</h5>
-            <p class="card-text" id="revenue-generated">$0</p>
-            <p class="card-text text-success" id="revenue-growth">+0%</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Number of Customers</h5>
-            <p class="card-text" id="number-customers">0</p>
-            <p class="card-text text-primary" id="new-vs-returning">New</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card text-center" data-aos="fade-up">
-          <div class="card-body">
-            <h5 class="card-title">Top Product</h5>
-            <p class="card-text" id="top-product-name">N/A</p>
-            <p class="card-text text-warning" id="top-product-sales">0 Sales</p>
-          </div>
-        </div>
-      </div>
-    </section>
+<body class="bg-light" aria-label="Shop owner dashboard">
 
-    <section id="visualized-analytics" class="row mt-5">
-      <div class="col-md-12">
-        <canvas id="analyticsChart"></canvas>
-      </div>
-    </section>
-
-    <section id="product-management" class="mt-5">
-      <h2>Product Management & Promotions</h2>
-      <form id="product-form" class="mt-3">
-        <input type="hidden" id="product-id">
-        <div class="form-group">
-          <label for="product-name">Product Name</label>
-          <input type="text" class="form-control" id="product-name" required>
-        </div>
-        <div class="form-group">
-          <label for="product-price">Price</label>
-          <input type="number" class="form-control" id="product-price" required>
-        </div>
-        <div class="form-group">
-          <label for="product-description">Description</label>
-          <textarea class="form-control" id="product-description" rows="3" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="product-image">Product Image</label>
-          <input type="file" class="form-control" id="product-image" multiple required>
-        </div>
-        <button type="submit" class="btn btn-primary">Save Product</button>
-      </form>
-      <div id="message" class="mt-3"></div>
-      <div class="product-card mt-3" id="product-image-preview-container"></div>
-      <ul id="product-list" class="list-group mt-3" data-aos="fade-up">
-        <!-- Products will be listed here -->
+<!-- Responsive Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <img src="images/logo.png" alt="Super Mall Logo" height="30" class="d-inline-block align-top">
+      Shop Owner Portal
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" aria-current="page">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#products-section">Products</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#offers-section">Offers</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#orders-section">Orders</a>
+        </li>
       </ul>
-      <button id="delete-product" class="btn btn-danger mt-3">Delete Product</button>
-
-      <h2 class="mt-5">Special Offers</h2>
-      <form id="offer-form" class="mt-3">
-        <div class="form-group">
-          <label for="offer-name">Offer Name</label>
-          <input type="text" class="form-control" id="offer-name" required>
+      <div class="d-flex">
+        <div class="dropdown">
+          <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="images/profile-icon.jpg" alt="Profile" width="30" height="30" class="rounded-circle me-2">
+            <span id="shop-name-nav"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" id="shop-owner-profile-link" href="#">Profile</a></li>
+            <li><a class="dropdown-item" href="shop-settings.html">Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+          </ul>
         </div>
-        <div class="form-group">
-          <label for="offer-description">Description</label>
-          <textarea class="form-control" id="offer-description" rows="3" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="offer-discount">Discount (%)</label>
-          <input type="number" class="form-control" id="offer-discount" required>
-        </div>
-        <div class="form-group">
-          <label for="offer-start-date">Start Date</label>
-          <input type="date" class="form-control" id="offer-start-date" required>
-        </div>
-        <div class="form-group">
-          <label for="offer-end-date">End Date</label>
-          <input type="date" class="form-control" id="offer-end-date" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Create Offer</button>
-      </form>
-      <div id="offer-list" class="list-group mt-3" data-aos="fade-up">
-        <!-- Offers will be listed here -->
       </div>
-    </section>
-
-    <section id="orders" class="mt-5">
-      <h2>Orders</h2>
-      <div id="orders-container" class="row">
-        <!-- Orders will be listed here -->
-      </div>
-    </section>
-  </main>
-  <footer class="footer mt-auto py-3 bg-light">
-    <div class="container">
-      <span class="text-muted">© 2025 SuperMall</span>
     </div>
-  </footer>
-  <script>
-    AOS.init();
-  </script>
+  </div>
+</nav>
+
+<div class="container py-4" role="main">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>🛍️ Shop Owner Dashboard</h1>
+    <h2 id="shop-name-display" class="text-muted"></h2>
+  </div>
+
+  <!-- 🔹 Metrics Section -->
+  <div class="row g-4">
+    <div class="col-md-2 col-6">
+      <div class="card text-center p-3">
+        <h2 class="h6">Total Sales</h2>
+        <p id="total-sales" aria-live="polite">₹0.00</p>
+      </div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="card text-center p-3">
+        <h6>Total Orders</h6>
+        <p id="total-orders">0</p>
+      </div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="card text-center p-3">
+        <h6>Revenue</h6>
+        <p id="revenue">₹0</p>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="card text-center p-3">
+        <h6>Customers Visited</h6>
+        <p id="customers-visited">0</p>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="card text-center p-3">
+        <h6>Top Product</h6>
+        <p id="top-product">N/A</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Predictive Chart -->
+  <div class="section-title">
+    <h4>📊 Sales & Revenue Chart</h4>
+  </div>
+  <canvas id="salesChart" height="100"></canvas>
+
+  <!-- 🔹 Product Management -->
+  <div class="section-title d-flex justify-content-between align-items-center">
+    <h4>📦 Add / Edit Product</h4>
+    <button class="btn btn-outline-info" id="view-all-products">View All Products</button>
+  </div>
+
+  <form id="product-form" aria-label="Product management form">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label for="product-name" class="visually-hidden">Product Name</label>
+        <input type="text" class="form-control" id="product-name" placeholder="Product Name" required aria-required="true">
+      </div>
+      <div class="col-md-2">
+        <label for="product-price" class="visually-hidden">Product Price</label>
+        <input type="number" class="form-control" id="product-price" placeholder="Price ₹" required aria-required="true">
+      </div>
+      <div class="col-md-2">
+        <label for="product-quantity" class="visually-hidden">Product Quantity</label>
+        <input type="number" class="form-control" id="product-quantity" placeholder="Quantity" required aria-required="true">
+      </div>
+      <div class="col-md-3">
+        <label for="product-description" class="visually-hidden">Product Description</label>
+        <input type="text" class="form-control" id="product-description" placeholder="Description" aria-label="Product description">
+      </div>
+      <div class="col-md-2">
+        <label for="product-image" class="visually-hidden">Product Image</label>
+        <input type="file" class="form-control" id="product-image" accept="image/*" aria-label="Upload product image">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Save Product</button>
+  </form>
+
+  <!-- 🔹 Offers Section -->
+  <div class="section-title d-flex justify-content-between align-items-center">
+    <h4>🎁 Promotions & Offers</h4>
+    <button class="btn btn-outline-info" id="view-all-offers">View All Offers</button>
+  </div>
+
+  <form id="offer-form" aria-label="Offer management form">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label for="offer-name" class="visually-hidden">Offer Name</label>
+        <input type="text" class="form-control" id="offer-name" placeholder="Offer Name" required aria-required="true">
+      </div>
+      <div class="col-md-3">
+        <label for="offer-description" class="visually-hidden">Offer Description</label>
+        <input type="text" class="form-control" id="offer-description" placeholder="Description" aria-label="Offer description">
+      </div>
+      <div class="col-md-2">
+        <label for="offer-discount" class="visually-hidden">Discount Percentage</label>
+        <input type="number" class="form-control" id="offer-discount" placeholder="Discount %" required aria-required="true">
+      </div>
+      <div class="col-md-2">
+        <label for="offer-type" class="visually-hidden">Offer Type</label>
+        <select class="form-control" id="offer-type" aria-label="Select offer type">
+          <option value="festival">Festival</option>
+          <option value="product">Product</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="offer-start" class="visually-hidden">Offer Start Date</label>
+        <input type="date" class="form-control" id="offer-start" required aria-required="true">
+      </div>
+      <div class="col-md-2">
+        <label for="offer-end" class="visually-hidden">Offer End Date</label>
+        <input type="date" class="form-control" id="offer-end" required aria-required="true">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success mt-3">Create Offer</button>
+  </form>
+
+  <!-- 🔹 Orders Section -->
+  <div class="section-title">
+    <h4>🛍️ Orders</h4>
+  </div>
+  <div id="orders-section" class="table-responsive">
+    <table class="table table-striped table-bordered" aria-label="Order details">
+      <thead>
+        <tr>
+          <th scope="col">Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total ₹</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="orders-table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 🔹 Modal for All Products -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">📋 All Products</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="all-products-list">
+        <!-- Products will be injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+<script type="module" src="shop-owner-dashboard.js"></script>
+<script type="module">
+  import { auth, db } from './js/firebase-config.js';
+  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+  import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+  
+  document.addEventListener('DOMContentLoaded', async () => {
+    const profileLink = document.getElementById('shop-owner-profile-link');
+    
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Get user data from Firestore
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          
+          // Set correct profile link based on user type
+          if (userData.isAdmin) {
+            profileLink.href = 'admin-profile.html';
+          } else if (userData.isShopOwner) {
+            profileLink.href = 'profile.html';
+          } else {
+            profileLink.href = 'user-profile.html';
+          }
+        }
+      }
+    });
+  });
+</script>
 </body>
 </html>

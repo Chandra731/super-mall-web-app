@@ -1,224 +1,241 @@
-import { auth, db } from './firebase-config.js';
-import { signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-import { doc, setDoc, getDoc, query, where, getDocs, collection, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+// shop-owner-dashboard.js
 
-document.addEventListener('DOMContentLoaded', async function () {
-  const productForm = document.getElementById('product-form');
-  const productIdInput = document.getElementById('product-id');
-  const productNameInput = document.getElementById('product-name');
-  const productPriceInput = document.getElementById('product-price');
-  const productDescriptionInput = document.getElementById('product-description');
-  const productImageInput = document.getElementById('product-image');
-  const productList = document.getElementById('product-list');
-  const deleteProductButton = document.getElementById('delete-product');
-  const salesChartCtx = document.getElementById('analyticsChart').getContext('2d');
-  const productPerformanceDiv = document.getElementById('productPerformance');
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, doc, getDoc,
+  updateDoc, query, where, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  let currentProductId = null;
+// 🧩 Import your Firebase config from separate file
+import { firebaseConfig } from './firebase-config.js';
 
-  // Initialize sales chart
-  const salesChart = new Chart(salesChartCtx, {
+// 🔌 Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 📍 SHOP ID (could be from auth or static for now)
+const shopId = "my-shop-001";
+
+// ✅ 1. Dashboard Metrics
+async function loadDashboardMetrics() {
+  const ordersSnapshot = await getDocs(query(collection(db, "orders"), where("shopId", "==", shopId)));
+
+  let totalSales = 0;
+  let totalOrders = 0;
+  let customers = new Set();
+  let productSales = {};
+
+  ordersSnapshot.forEach(doc => {
+    const data = doc.data();
+    totalOrders++;
+    if (data.status === "Delivered") {
+      totalSales += data.total;
+    }
+    customers.add(data.customerId);
+
+    data.items.forEach(item => {
+      if (!productSales[item.productId]) {
+        productSales[item.productId] = { name: item.name, quantity: 0 };
+      }
+      productSales[item.productId].quantity += item.quantity;
+    });
+  });
+
+  // Find Top Product
+  let topProduct = Object.values(productSales).sort((a, b) => b.quantity - a.quantity)[0];
+
+  document.getElementById("total-sales").textContent = `₹${totalSales}`;
+  document.getElementById("total-orders").textContent = totalOrders;
+  document.getElementById("customers-visited").textContent = customers.size;
+  document.getElementById("top-product").textContent = topProduct?.name || "N/A";
+}
+
+// 🔹 2. Predictive Charts
+function renderCharts() {
+  const ctx = document.getElementById("salesChart").getContext("2d");
+  new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [], // Dates will be added here
+      labels: ["Jan", "Feb", "Mar", "Apr"],
       datasets: [{
-        label: 'Sales',
-        data: [], // Sales data will be added here
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        fill: true,
+        label: "Sales",
+        data: [1200, 2100, 1800, 2500],
+        borderColor: "blue"
       }]
     },
     options: {
-      responsive: true,
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day'
-          }
-        },
-        y: {
-          beginAtZero: true
-        }
-      }
+      responsive: true
     }
   });
+}
 
-  // Load and render product performance using D3.js
-  const renderProductPerformance = (data) => {
-    const width = 400;
-    const height = 300;
-    const svg = d3.select(productPerformanceDiv)
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height);
+// 🔹 3. Product Management
+document.getElementById("product-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("product-name").value;
+  const price = parseFloat(document.getElementById("product-price").value);
+  const description = document.getElementById("product-description").value;
+  const quantity = parseInt(document.getElementById("product-quantity").value);
+  const image = document.getElementById("product-image").files[0];
 
-    const x = d3.scaleBand()
-      .domain(data.map(d => d.productName))
-      .range([0, width])
-      .padding(0.1);
+  if (!image) return alert("Select an image");
 
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.sales)])
-      .nice()
-      .range([height, 0]);
+  const formData = new FormData();
+  formData.append("image", image);
 
-    svg.append('g')
-      .selectAll('rect')
-      .data(data)
-      .enter()
-      .append('rect')
-      .attr('x', d => x(d.productName))
-      .attr('y', d => y(d.sales))
-      .attr('width', x.bandwidth())
-      .attr('height', d => height - y(d.sales))
-      .attr('fill', 'steelblue');
-
-    svg.append('g')
-      .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(x));
-
-    svg.append('g')
-      .call(d3.axisLeft(y));
-  };
-
-  // Fetch and render sales data
-  const fetchSalesData = async () => {
-    const salesData = []; // Fetch sales data from Firestore
-    salesChart.data.labels = salesData.map(d => d.date);
-    salesChart.data.datasets[0].data = salesData.map(d => d.sales);
-    salesChart.update();
-  };
-
-  // Fetch and render product performance data
-  const fetchProductPerformanceData = async () => {
-    const performanceData = []; // Fetch product performance data from Firestore
-    renderProductPerformance(performanceData);
-  };
-
-  productForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const productName = productNameInput.value;
-    const productPrice = productPriceInput.value;
-    const productDescription = productDescriptionInput.value;
-    const productImages = productImageInput.files;
-
-    const userId = auth.currentUser.uid;
-    const shopQuery = query(collection(db, 'shops'), where('userId', '==', userId), where('approved', '==', true));
-    const shopSnapshot = await getDocs(shopQuery);
-    if (!shopSnapshot.empty) {
-      const shop = shopSnapshot.docs[0].data().shopId;
-
-      let productId;
-      if (currentProductId) {
-        productId = currentProductId;
-      } else {
-        productId = doc(collection(db, 'products')).id;
-      }
-
-      const formData = new FormData();
-      Array.from(productImages).forEach(image => {
-        formData.append('images', image);
-      });
-
-      try {
-        // Upload images to local storage (Node.js server)
-        const response = await fetch('http://localhost:5000/upload', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) {
-          const errorResponse = await response.json();
-          throw new Error(errorResponse.error);
-        }
-
-        const result = await response.json();
-
-        const productData = {
-          productId: productId,
-          shopId: shop,
-          productName: productName,
-          productPrice: productPrice,
-          productDescription: productDescription,
-          productImageUrls: result.imageUrls // Store image URLs in Firestore
-        };
-
-        await setDoc(doc(db, 'products', productId), productData);
-        currentProductId = null;
-        productForm.reset();
-        loadProducts();
-      } catch (error) {
-        alert(error.message);
-      }
-    }
+  const uploadRes = await fetch("http://localhost:5000/upload", {
+    method: "POST",
+    body: formData,
   });
 
-  const loadProducts = async () => {
-    productList.innerHTML = '';
-    const userId = auth.currentUser.uid;
-    const shopQuery = query(collection(db, 'shops'), where('userId', '==', userId), where('approved', '==', true));
-    const shopSnapshot = await getDocs(shopQuery);
-    if (!shopSnapshot.empty) {
-      const shop = shopSnapshot.docs[0].data().shopId;
-      const productQuery = query(collection(db, 'products'), where('shopId', '==', shop));
-      const productSnapshot = await getDocs(productQuery);
-      productSnapshot.forEach(doc => {
-        const product = doc.data();
-        const listItem = document.createElement('li');
-        listItem.className = 'list-group-item';
-        listItem.setAttribute('data-aos', 'fade-up');
-        listItem.innerHTML = `
-          <h4>${product.productName}</h4>
-          <p>Price: $${product.productPrice}</p>
-          <p>${product.productDescription}</p>
-          ${product.productImageUrls.map(url => `<img src="${url}" alt="${product.productName}" class="img-fluid mb-2" style="max-width: 200px;">`).join('')}
-          <button class="btn btn-primary" onclick="editProduct('${product.productId}')">Edit</button>
-        `;
-        productList.appendChild(listItem);
-      });
-    }
-  };
+  const { imageUrl } = await uploadRes.json();
 
-  window.editProduct = async (productId) => {
-    const productDoc = await getDoc(doc(db, 'products', productId));
-    if (productDoc.exists()) {
-      const product = productDoc.data();
-      currentProductId = product.productId;
-      productIdInput.value = product.productId;
-      productNameInput.value = product.productName;
-      productPriceInput.value = product.productPrice;
-      productDescriptionInput.value = product.productDescription;
-      document.getElementById('product-image-preview').src = product.productImageUrls[0];
-    }
-  };
-
-  deleteProductButton.addEventListener('click', async () => {
-    if (currentProductId) {
-      try {
-        await deleteDoc(doc(db, 'products', currentProductId));
-        currentProductId = null;
-        productForm.reset();
-        loadProducts();
-      } catch (error) {
-        alert(error.message);
-      }
-    }
+  await addDoc(collection(db, "products"), {
+    shopId,
+    name,
+    price,
+    description,
+    quantity,
+    imageUrl,
+    createdAt: serverTimestamp()
   });
 
-  document.getElementById('logout').addEventListener('click', async () => {
+  alert("Product added!");
+  e.target.reset();
+  loadAllProducts();
+});
+
+// 🔹 4. View All Products
+async function loadAllProducts() {
+  const productList = document.getElementById("product-list");
+  productList.innerHTML = "";
+
+  const snapshot = await getDocs(query(collection(db, "products"), where("shopId", "==", shopId)));
+
+  snapshot.forEach(doc => {
+    const p = doc.data();
+    const item = document.createElement("div");
+    item.classList.add("product-card");
+    item.innerHTML = `
+      <img src="${p.imageUrl}" width="80" />
+      <h4>${p.name}</h4>
+      <p>₹${p.price}</p>
+      <p>Qty: ${p.quantity}</p>
+      <p>${p.description}</p>
+    `;
+    productList.appendChild(item);
+  });
+}
+
+document.getElementById("view-all-products").addEventListener("click", loadAllProducts);
+
+// 🔹 5. Promotions / Offers
+document.getElementById("offer-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("offer-name").value;
+  const description = document.getElementById("offer-description").value;
+  const discount = parseFloat(document.getElementById("offer-discount").value);
+  const type = document.getElementById("offer-type").value;
+
+  await addDoc(collection(db, "offers"), {
+    shopId,
+    name,
+    description,
+    type,
+    discount,
+    startDate: new Date(),
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    createdAt: serverTimestamp()
+  });
+
+  alert("Offer created!");
+  e.target.reset();
+  loadOffers();
+});
+
+async function loadOffers() {
+  const offerList = document.getElementById("offer-list");
+  offerList.innerHTML = "";
+
+  const snapshot = await getDocs(query(collection(db, "offers"), where("shopId", "==", shopId)));
+
+  snapshot.forEach(doc => {
+    const o = doc.data();
+    const item = document.createElement("li");
+    item.innerHTML = `${o.name} (${o.type}) - ${o.discount}% off`;
+    offerList.appendChild(item);
+  });
+}
+
+document.getElementById("view-all-offers").addEventListener("click", loadOffers);
+
+// 🔹 6. Orders Section
+async function loadOrders() {
+  const orderList = document.getElementById("order-list");
+  orderList.innerHTML = "";
+
+  const snapshot = await getDocs(query(collection(db, "orders"), where("shopId", "==", shopId)));
+
+  snapshot.forEach(docSnap => {
+    const o = docSnap.data();
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <h4>Order: ${docSnap.id}</h4>
+      <p>Customer: ${o.customerName}</p>
+      <p>Total: ₹${o.total}</p>
+      <select onchange="updateOrderStatus('${docSnap.id}', this.value)">
+        <option value="Pending" ${o.status === "Pending" ? "selected" : ""}>Pending</option>
+        <option value="Shipped" ${o.status === "Shipped" ? "selected" : ""}>Shipped</option>
+        <option value="Delivered" ${o.status === "Delivered" ? "selected" : ""}>Delivered</option>
+      </select>
+    `;
+    orderList.appendChild(div);
+  });
+}
+
+window.updateOrderStatus = async function (orderId, newStatus) {
+  await updateDoc(doc(db, "orders", orderId), { status: newStatus });
+  alert("Order status updated");
+};
+
+document.getElementById("view-orders").addEventListener("click", loadOrders);
+
+// 🔹 Get Shop Name
+async function loadShopName() {
+  const shopDoc = await getDoc(doc(db, "shops", shopId));
+  if (shopDoc.exists()) {
+    const shopName = shopDoc.data().name;
+    document.getElementById("shop-name-display").textContent = shopName;
+    document.getElementById("shop-name-nav").textContent = shopName;
+  }
+}
+
+// 🔹 Handle Logout
+document.getElementById("logout-btn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  try {
     await signOut(auth);
-    window.location.href = 'login.html';
-  });
+    window.location.href = "login.html";
+  } catch (error) {
+    console.error("Logout error:", error);
+    alert("Error during logout. Please try again.");
+  }
+});
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = 'login.html';
-    } else {
-      loadProducts();
-      fetchSalesData();
-      fetchProductPerformanceData();
-    }
+// 🔹 Smooth scrolling for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href')).scrollIntoView({
+      behavior: 'smooth'
+    });
   });
 });
+
+// 🚀 Load Metrics and Chart on Start
+window.onload = () => {
+  loadShopName();
+  loadDashboardMetrics();
+  renderCharts();
+};

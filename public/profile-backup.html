@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Select Floor - SuperMall</title>
+  <title>User Profile - SuperMall</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Firebase SDKs -->
-  <script type="module" src="js/floor.js"></script>
+  <script type="module" src="js/profile.js"></script>
 </head>
 <body>
   <header>
@@ -19,41 +19,37 @@
             <a class="nav-link" href="index.html">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="shops.html">Shops</a>
+            <a class="nav-link" href="floor.html">Floors</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="offers.html">Offers</a>
+            <a class="nav-link" href="cart.html">Cart</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="reviews.html">Reviews</a>
+            <a class="nav-link" href="orders.html">Orders</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="contact.html">Contact</a>
+            <a class="nav-link" href="profile.html">Profile</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link btn btn-primary text-black" href="login.html">Login</a>
+            <a class="nav-link" href="#" id="logout">Logout</a>
           </li>
         </ul>
       </div>
     </nav>
   </header>
   <main class="container mt-5">
-    <h1>Select Floor</h1>
-    <form id="floor-selection-form">
+    <h1>User Profile</h1>
+    <form id="profile-form">
       <div class="form-group">
-        <label for="floor">Select Floor</label>
-        <select class="form-control" id="floor" required>
-          <option value="1">Floor 1</option>
-          <option value="2">Floor 2</option>
-          <option value="3">Floor 3</option>
-          <option value="4">Floor 4</option>
-        </select>
+        <label for="display-name">Display Name</label>
+        <input type="text" class="form-control" id="display-name" placeholder="Enter your display name">
       </div>
-      <button type="submit" class="btn btn-primary">Get Shops</button>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" class="form-control" id="email" placeholder="Enter your email" disabled>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
-    <ul id="shop-list" class="list-group mt-3">
-      <!-- Shops will be listed here -->
-    </ul>
   </main>
   <footer class="footer mt-auto py-3 bg-light">
     <div class="container">

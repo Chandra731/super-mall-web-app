@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Settings</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .settings-card {
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .settings-section {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <h1 class="mb-4">Shop Settings</h1>
+    
+    <div class="settings-section">
+      <h2>Shop Information</h2>
+      <div class="card settings-card">
+        <div class="card-body">
+          <form id="shop-info-form">
+            <div class="mb-3">
+              <label for="shop-name" class="form-label">Shop Name</label>
+              <input type="text" class="form-control" id="shop-name" placeholder="Enter shop name" required>
+            </div>
+            <div class="mb-3">
+              <label for="shop-category" class="form-label">Category</label>
+              <select class="form-control" id="shop-category" required>
+                <option value="">Select category</option>
+                <option value="fashion">Fashion</option>
+                <option value="electronics">Electronics</option>
+                <option value="food">Food & Beverage</option>
+                <option value="services">Services</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="shop-floor" class="form-label">Floor Location</label>
+              <select class="form-control" id="shop-floor" required>
+                <option value="">Select floor</option>
+                <option value="ground">Ground Floor</option>
+                <option value="first">First Floor</option>
+                <option value="second">Second Floor</option>
+                <option value="third">Third Floor</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="shop-description" class="form-label">Description</label>
+              <textarea class="form-control" id="shop-description" rows="3" placeholder="Enter shop description" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="shop-email" class="form-label">Contact Email</label>
+              <input type="email" class="form-control" id="shop-email" placeholder="Enter contact email" required>
+            </div>
+            <div class="mb-3">
+              <label for="shop-phone" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="shop-phone" placeholder="Enter phone number" required>
+            </div>
+            <div class="mb-3">
+              <label for="shop-logo" class="form-label">Shop Logo</label>
+              <input type="file" class="form-control" id="shop-logo" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2>Business Hours</h2>
+      <div class="card settings-card">
+        <div class="card-body">
+          <form id="business-hours-form">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="opening-time" class="form-label">Opening Time</label>
+                <input type="time" class="form-control" id="opening-time">
+              </div>
+              <div class="col-md-6">
+                <label for="closing-time" class="form-label">Closing Time</label>
+                <input type="time" class="form-control" id="closing-time">
+              </div>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="open-weekends">
+              <label class="form-check-label" for="open-weekends">Open on Weekends</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Hours</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2>Notifications</h2>
+      <div class="card settings-card">
+        <div class="card-body">
+          <form id="notifications-form">
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="email-notifications" checked>
+              <label class="form-check-label" for="email-notifications">Email Notifications</label>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="sms-notifications">
+              <label class="form-check-label" for="sms-notifications">SMS Notifications</label>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="promo-notifications" checked>
+              <label class="form-check-label" for="promo-notifications">Promotional Offers</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Preferences</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="js/shop-settings.js"></script>
+</body>
+</html>
