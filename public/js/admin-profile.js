@@ -41,6 +41,17 @@ document.addEventListener('DOMContentLoaded', async function() {
   imageUpload.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        profilePic.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+      
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image must be smaller than 5MB');
+        return;
+      }
       const user = auth.currentUser;
       if (user) {
         try {
@@ -49,18 +60,17 @@ document.addEventListener('DOMContentLoaded', async function() {
           formData.append('userId', user.uid);
           formData.append('type', 'admin');
 
-          const response = await fetch('/upload-profile-image', {
+          const response = await fetch('http://localhost:5001/upload/profile', {
             method: 'POST',
             body: formData
           });
 
-          const result = await response.json();
-          if (result.success) {
-            profilePic.src = result.imageUrl;
-            await setDoc(doc(db, 'admins', user.uid), {
-              profileImage: result.imageUrl
-            }, { merge: true });
-          }
+          const { urls } = await response.json();
+          const imageUrl = urls[0];
+          profilePic.src = imageUrl;
+          await setDoc(doc(db, 'admins', user.uid), {
+            profileImage: imageUrl
+          }, { merge: true });
         } catch (error) {
           console.error('Error uploading image:', error);
         }

@@ -1,7 +1,18 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-import { doc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
-import { query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { 
+  doc, 
+  getDoc, 
+  collection, 
+  getDocs, 
+  addDoc, 
+  query, 
+  where, 
+  orderBy 
+} from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+
+// Create Firestore document reference helper
+const getDocRef = (collectionPath, docId) => doc(db, collectionPath, docId);
 
 document.addEventListener('DOMContentLoaded', function () {
   const greetingMessage = document.getElementById('greetingMessage');
@@ -11,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const contactForm = document.getElementById('contact-form');
   const featuredShopsContainer = document.getElementById('featured-shops');
 
-// Handle authentication state changes
-onAuthStateChanged(auth, async (user) => {
+  // Handle authentication state changes
+  onAuthStateChanged(auth, async (user) => {
     console.log("Auth state changed. User object:", user);
   
     if (user) {
@@ -86,30 +97,156 @@ onAuthStateChanged(auth, async (user) => {
   
       querySnapshot.forEach((doc) => {
         const shopData = doc.data();
+        console.log('Shop data:', shopData);
+        
+        const imageUrl = (Array.isArray(shopData.shopImageUrls) && shopData.shopImageUrls.length > 0)
+          ? shopData.shopImageUrls[0]
+          : shopData.shopImage || 'public/images/default-shop.jpg';
+        
+        const name = shopData.name || 'Shop Name Not Available';
+        const desc = shopData.description || 'No description available';
+
         const shopCard = `
           <div class="col-md-4">
-            <div class="card mb-4">
-              <img src="${shopData.shopImages}" class="card-img-top" alt="${shopData.shopName}">
+            <div class="card mb-4 shop-card" data-shop-id="${doc.id}" ${shopData.floor ? `data-floor="${shopData.floor}"` : ''}>
+              <img src="${imageUrl}" class="card-img-top" alt="${name}"
+                   onerror="this.src='public/images/default-shop.jpg'">
               <div class="card-body">
-                <h5 class="card-title">${shopData.shopName}</h5>
-                <p class="card-text">${shopData.shopDescription}</p>
+                <h5 class="card-title">${name}</h5>
+                <p class="card-text">${desc}</p>
               </div>
             </div>
           </div>
         `;
         featuredShopsContainer.insertAdjacentHTML('beforeend', shopCard);
+        
+        // Add click handler to featured shop card
+        const cardElement = featuredShopsContainer.lastElementChild.querySelector('.shop-card');
+        if (cardElement) {
+          cardElement.addEventListener('click', () => {
+            const shopId = cardElement.getAttribute('data-shop-id');
+            window.location.href = `shop.html?id=${shopId}`;
+          });
+        }
       });
     } catch (error) {
-      console.error('🔥 Error loading featured shops:', error.message);
+      console.error('Error loading featured shops:', error.message);
     }
   }
-  
+
+  // Load and display current offers
+  async function loadCurrentOffers() {
+    const offersContainer = document.getElementById('offers-container');
+    const loadingElement = document.getElementById('offers-loading');
+    const noOffersElement = document.getElementById('no-offers');
+    
+    try {
+      const now = new Date();
+      const offersQuery = query(
+        collection(db, 'offers'),
+        where('endDate', '>=', now),
+        orderBy('endDate', 'asc')
+      );
+      
+      const querySnapshot = await getDocs(offersQuery);
+      
+      if (loadingElement) loadingElement.style.display = 'none';
+      
+      if (querySnapshot.empty) {
+        if (noOffersElement) noOffersElement.style.display = 'block';
+        return;
+      }
+      
+      offersContainer.innerHTML = '';
+      
+      querySnapshot.forEach(async (doc) => {
+        const offer = doc.data();
+        const offerCard = document.createElement('div');
+        offerCard.className = 'col-md-4 mb-4';
+        
+        // Get shop name and floor only
+        let shopName = 'Shop';
+        let shopFloor = '';
+        let validShopId = false;
+        
+        if (offer.shopId) {
+          try {
+            const shopRef = getDocRef('shops', offer.shopId);
+            const shopDoc = await getDoc(shopRef);
+            if (shopDoc.exists()) {
+              const shopData = shopDoc.data();
+              shopName = shopData.name || 'Shop';
+              shopFloor = shopData.floor ? `Floor ${shopData.floor}` : '';
+              validShopId = true;
+            }
+          } catch (error) {
+            console.error('Error fetching shop details:', error);
+          }
+        }
+
+        offerCard.innerHTML = `
+          <div class="card h-100 offer-card" ${validShopId ? `data-shop-id="${offer.shopId}"` : ''}>
+            <div class="card-body">
+              <h6 class="mb-2">${shopName} ${shopFloor}</h6>
+              <h5 class="card-title">${offer.name}</h5>
+              <p class="card-text">${offer.description}</p>
+              <p class="text-success fw-bold">${offer.discount}% OFF</p>
+              <p class="text-muted small">Valid until ${offer.endDate.toDate().toLocaleDateString()}</p>
+            </div>
+          </div>
+        `;
+        offersContainer.appendChild(offerCard);
+
+        // Add click handler only if valid shop ID exists
+        if (validShopId) {
+          const offerCardElement = offerCard.querySelector('.offer-card');
+          if (offerCardElement) {
+            offerCardElement.addEventListener('click', () => {
+              window.location.href = `shop.html?id=${offer.shopId}`;
+            });
+          }
+        } else {
+          const offerCardElement = offerCard.querySelector('.offer-card');
+          if (offerCardElement) {
+            offerCardElement.style.cursor = 'default';
+          }
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error loading offers:', error);
+      if (loadingElement) loadingElement.style.display = 'none';
+      
+      // Show different messages based on error type
+      if (error.code === 'permission-denied') {
+        if (noOffersElement) {
+          noOffersElement.textContent = 'Please login to view offers';
+          noOffersElement.style.display = 'block';
+        }
+      } else {
+        if (noOffersElement) {
+          noOffersElement.textContent = 'Error loading offers. Please try again later.';
+          noOffersElement.style.display = 'block';
+        }
+      }
+      
+      // Show login button if not authenticated
+      if (!auth.currentUser) {
+        const loginPrompt = document.createElement('div');
+        loginPrompt.className = 'col-12 text-center mt-3';
+        loginPrompt.innerHTML = `
+          <a href="login.html" class="btn btn-primary">Login to View Offers</a>
+        `;
+        offersContainer.appendChild(loginPrompt);
+      }
+    }
+  }
 
   loadFeaturedShops();
-
+  loadCurrentOffers();
 
   // Handle Contact Form Submission
-    if (contactForm) {
+  if (contactForm) {
     contactForm.addEventListener('submit', async function(event) {
       event.preventDefault();
       const user = auth.currentUser;

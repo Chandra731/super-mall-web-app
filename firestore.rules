@@ -3,65 +3,126 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 🔹 Users can read & update their own profile
+    // 🔒 USERS
     match /users/{userId} {
+      // A user can read & write their own profile
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // Admins can read user profiles
-      allow read: if request.auth != null &&
-                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      // Admins can read any user profile
+      allow read: if isAdmin();
     }
 
-    // 🔹 Shop Owners can create & update only their shop
+    // 🔒 SHOPS
     match /shops/{shopId} {
+      // Shop owner can create a shop
       allow create: if request.auth != null;
+
+      // Shop owner can update/delete their own shop
       allow update, delete: if request.auth != null &&
                             request.auth.uid == resource.data.userId;
+
+      // Anyone logged in can read shops (for listing, browsing, etc.)
       allow read: if request.auth != null;
+
+      // Admins can fully manage shops
+      allow read, write: if isAdmin();
     }
 
-    // 🔹 Shop Owners can create & manage their own products securely
+    // 🔒 PRODUCTS
     match /products/{productId} {
+      // Anyone authenticated can create a product
       allow create: if request.auth != null;
 
-      // Only the shop owner can update/delete their product
+      // Only the owner of the product's shop can update/delete it
       allow update, delete: if request.auth != null &&
         exists(/databases/$(database)/documents/shops/$(resource.data.shopId)) &&
         get(/databases/$(database)/documents/shops/$(resource.data.shopId)).data.userId == request.auth.uid;
 
+      // Authenticated users can read products
       allow read: if request.auth != null;
+
+      // Admins can read/write any product
+      allow read, write: if isAdmin();
     }
 
-    // 🔹 Admins can approve shops & manage only non-user data
-    match /shops/{shopId} {
-      allow read, write: if request.auth != null &&
-                         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // 🔒 ORDERS
+    match /orders/{orderId} {
+      // Anyone logged in can create an order
+      allow create: if request.auth != null;
+
+      // User can read their own orders
+      allow read: if request.auth != null &&
+                  request.auth.uid == resource.data.userId;
+
+      // Shop owners can read orders for their shop
+      allow read: if 
+        request.auth != null && 
+        resource.data.shopId != null &&
+        exists(/databases/$(database)/documents/shops/$(resource.data.shopId)) &&
+        get(/databases/$(database)/documents/shops/$(resource.data.shopId)).data.ownerId == request.auth.uid;
+
+      // Admins can read/write all orders
+      allow read, write: if isAdmin();
     }
 
-    match /products/{productId} {
-      allow read, write: if request.auth != null &&
-                         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    // 🔹 Users can read & manage their own cart documents
+    // 🔒 CARTS (subcollection)
     match /carts/{userId}/items/{itemId} {
+      // User can manage their own cart
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // 🔹 Allow users to verify email for password reset
+    // 🔒 For email verification/password reset (optional)
     match /users/{userId} {
       allow get: if request.auth != null || request.method == 'GET';
     }
 
-    // 🔹 Users can create orders and read their own orders
-    match /orders/{orderId} {
-      allow create: if request.auth != null;
-      allow read: if request.auth != null && 
-                  request.auth.uid == resource.data.userId;
+    // 📦 Add any other collections here...
+
+    // ✅ FUNCTION: Admin check
+    function isAdmin() {
+      return request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+    }
+
+    // ✅ FUNCTION: Shop Owner check
+    function isShopOwner() {
+      return request.auth != null && (
+        exists(/databases/$(database)/documents/shops/$(resource.data.shopId)) &&
+        get(/databases/$(database)/documents/shops/$(resource.data.shopId)).data.ownerId == request.auth.uid
+      );
+    }
+
+    // 🔒 ADMIN DASHBOARD ACCESS
+    // Allow admins to read all collections needed for dashboard
+    match /{document=**} {
+      allow read: if isAdmin();
+    }
+
+    // 🔒 OFFERS
+    match /offers/{offerId} {
+      // Shop owners can create offers for their own shops
+      allow create: if 
+        (request.auth != null && 
+         request.resource.data.shopId != null &&
+         exists(/databases/$(database)/documents/shops/$(request.resource.data.shopId)) &&
+         get(/databases/$(database)/documents/shops/$(request.resource.data.shopId)).data.ownerId == request.auth.uid) ||
+        isAdmin();
       
-      // Admins can read all orders
-      allow read: if request.auth != null &&
-                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      // Authenticated users can read all active offers
+      allow read: if request.auth != null;
+      
+      // Only admins can update/delete offers
+      allow update, delete: if isAdmin();
+    }
+
+    // 🔒 ADMIN WRITE ACCESS
+    match /shops/{shopId} {
+      allow write: if isAdmin();
+    }
+    match /users/{userId} {
+      allow write: if isAdmin();
     }
   }
 }

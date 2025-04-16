@@ -8,9 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const imagePreviewContainer = document.getElementById('image-preview-container');
   const submitBtn = document.getElementById('submit-text');
   const submitSpinner = document.getElementById('submit-spinner');
-  console.log(form);  // This should not log `null`
+
   if (!form) {
     alert("Form element not found!");
+    return;
   }
 
   // Image preview handler
@@ -51,21 +52,41 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.textContent = 'Processing...';
       submitSpinner.classList.remove('d-none');
 
-      const formData = new FormData();
+      // Validate images
       const files = imageInput.files;
-
-      for (let i = 0; i < files.length; i++) {
-        formData.append('shopImages', files[i]); // keep this name same as server expects
+      if (files.length === 0) {
+        throw new Error('Please upload at least one shop image');
       }
 
-      const uploadResponse = await fetch('http://localhost:5000/upload/shop-images', {
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      for (let i = 0; i < files.length; i++) {
+        if (!validTypes.includes(files[i].type)) {
+          throw new Error('Only JPG, PNG or WebP images are allowed');
+        }
+        if (files[i].size > 5 * 1024 * 1024) { // 5MB
+          throw new Error('Image size must be less than 5MB');
+        }
+      }
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('shopImages', files[i]);
+      }
+
+      const uploadResponse = await fetch('http://localhost:5001/upload/shop-images', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
       });
+
+      console.log('Raw upload response:', uploadResponse);
 
       const contentType = uploadResponse.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const errorText = await uploadResponse.text();
+        console.error('Unexpected server response:', errorText);
         throw new Error('Server returned HTML instead of JSON. Check server implementation.');
       }
 
@@ -79,18 +100,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await uploadResponse.json();
       const imageUrls = result.imageUrls || [];
 
-      // Save shop data to Firestore
+      // Validate required fields
+      const requiredFields = ['shop-name', 'shop-category', 'shop-floor', 'shop-number'];
+      for (const field of requiredFields) {
+        if (!form[field].value.trim()) {
+          throw new Error(`Please fill in ${field.replace('-', ' ')}`);
+        }
+      }
+
+      // Validate email format
+      const email = form['shop-email'].value.trim();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
+      // Validate phone number (basic check)
+      const phone = form['shop-phone'].value.trim();
+      if (phone && !/^[\d\s\-()+]{10,20}$/.test(phone)) {
+        throw new Error('Please enter a valid phone number');
+      }
+
       const shopData = {
-        name: form['shop-name'].value,
+        name: form['shop-name'].value.trim(),
         category: form['shop-category'].value,
-        description: form['shop-description'].value,
+        description: form['shop-description'].value.trim(),
         floor: form['shop-floor'].value,
         shopNumber: form['shop-number'].value,
-        address: form['shop-address'].value,
-        email: form['shop-email'].value,
-        phone: form['shop-phone'].value,
-        ownerName: form['owner-name'].value,
-        ownerId: form['owner-id'].value,
+        address: form['shop-address'].value.trim(),
+        email: email,
+        phone: phone,
+        ownerName: form['owner-name'].value.trim(),
         businessHours: {
           opening: form['opening-time'].value,
           closing: form['closing-time'].value,
@@ -98,8 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         shopImageUrls: imageUrls,
         createdAt: new Date(),
-        ownerId: user.uid,
-        status: 'pending'
+        ownerId: user.uid, // Single ownerId field
+        status: 'pending',
+        approved: false
       };
 
       await setDoc(doc(db, 'shops', user.uid), shopData);

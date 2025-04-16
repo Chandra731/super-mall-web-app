@@ -48,32 +48,33 @@ async function loadCartItems(userId) {
     for (const cartDoc of cartSnapshot.docs) {
       const cartItem = cartDoc.data();
       const cartItemId = cartDoc.id;
+      
       const productDoc = await getDoc(doc(db, 'products', cartItem.productId));
-
+      
       if (productDoc.exists()) {
         const product = productDoc.data();
         const listItem = document.createElement('li');
         listItem.className = 'list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row';
 
-        const itemTotal = product.productPrice * cartItem.quantity;
+        const itemTotal = product.price * cartItem.quantity;
         total += itemTotal;
         itemCount += cartItem.quantity;
 
         listItem.innerHTML = `
           <div>
-            <h5>${product.productName}</h5>
-            <p>Price: $${product.productPrice}</p>
+            <h5>${product.name}</h5>
+            <p>Price: ₹${product.price}</p>
             <div class="d-flex align-items-center">
               <button class="btn btn-sm btn-secondary me-2 decrease-btn" data-id="${cartItemId}">-</button>
               <span class="quantity-text">${cartItem.quantity}</span>
               <button class="btn btn-sm btn-secondary ms-2 increase-btn" data-id="${cartItemId}">+</button>
             </div>
-            <p class="mt-2">Item Total: $<span class="item-total">${itemTotal.toFixed(2)}</span></p>
+            <p class="mt-2">Item Total: ₹<span class="item-total">${itemTotal.toFixed(2)}</span></p>
             <button class="btn btn-sm btn-danger delete-btn mt-2" data-id="${cartItemId}">Delete</button>
           </div>
-          <img src="http://localhost:5000/uploads/${product.productImage}" alt="${product.productName}" class="img-fluid" style="max-width: 200px;">
+          <img src="${product.imageUrl}" alt="${product.name}" class="img-fluid" style="max-width: 200px;">
         `;
-        listItem.dataset.price = product.productPrice;
+        listItem.dataset.price = product.price;
         listItem.dataset.productId = cartItem.productId;
 
         cartItemsList.appendChild(listItem);
@@ -174,14 +175,14 @@ document.getElementById('checkout-button').addEventListener('click', async () =>
     }
 
     const product = productDoc.data();
-    total += product.productPrice * cartItem.quantity;
+    total += product.price * cartItem.quantity;
     itemCount += cartItem.quantity;
     orderItems.push({
       productId: cartItem.productId,
-      name: product.productName,
-      price: product.productPrice,
+      name: product.name,
+      price: product.price,
       quantity: cartItem.quantity,
-      image: product.productImage
+      image: product.imageUrl
     });
   }
 

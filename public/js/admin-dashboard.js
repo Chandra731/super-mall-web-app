@@ -5,6 +5,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -13,32 +14,47 @@ import {
 document.addEventListener('DOMContentLoaded', async function () {
   console.log("Admin Dashboard Loaded");
 
-  // Metrics Section
-  await updateMetrics();
+  // Verify admin status before proceeding
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
 
-  // Graphical Insights
-  const salesChartCtx = document.getElementById('salesChart').getContext('2d');
-  const revenueChartCtx = document.getElementById('revenueChart').getContext('2d');
-  renderLineChart(salesChartCtx, 'Sales Trends');
-  renderLineChart(revenueChartCtx, 'Revenue Trends');
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!(userDoc.data().role === 'admin' || userDoc.data().isAdmin === true)) {
+      alert('You do not have admin privileges');
+      window.location.href = 'index.html';
+      return;
+    }
 
-  // Shop Approval System
-  const pendingShops = await fetchPendingShops();
-  renderPendingShops(pendingShops);
+    // Metrics Section
+    await updateMetrics();
 
-  // Featured Shops System
-  const approvedShops = await fetchFeaturedShops();
-  renderFeaturedShops(approvedShops);
+    // Graphical Insights
+    const salesChartCtx = document.getElementById('salesChart').getContext('2d');
+    const revenueChartCtx = document.getElementById('revenueChart').getContext('2d');
+    renderLineChart(salesChartCtx, 'Sales Trends');
+    renderLineChart(revenueChartCtx, 'Revenue Trends');
 
-  // User Management Section
-  const users = await fetchUsers();
-  renderUsers(users);
+    // Shop Approval System
+    const pendingShops = await fetchPendingShops();
+    renderPendingShops(pendingShops);
 
-  // Logout Event
-  document.getElementById('logout').addEventListener('click', async () => {
-    await signOut(auth);
-    console.log("User logged out successfully");
-    window.location.href = 'login.html';
+    // Featured Shops System
+    const approvedShops = await fetchFeaturedShops();
+    renderFeaturedShops(approvedShops);
+
+    // User Management Section
+    const users = await fetchUsers();
+    renderUsers(users);
+
+    // Logout Event
+    document.getElementById('logout').addEventListener('click', async () => {
+      await signOut(auth);
+      console.log("User logged out successfully");
+      window.location.href = 'login.html';
+    });
   });
 });
 
@@ -82,28 +98,57 @@ async function fetchPendingShops() {
 function renderPendingShops(shops) {
   const container = document.getElementById('pending-shops');
   container.innerHTML = '';
+
   if (shops.length === 0) {
     container.innerHTML = '<p>No pending shops for approval.</p>';
     return;
   }
+
   shops.forEach((shop) => {
+    const imageUrl = (Array.isArray(shop.shopImageUrls) && shop.shopImageUrls.length > 0)
+      ? shop.shopImageUrls[0]
+      : shop.shopImage || 'public/images/default-shop.jpg';
+
     const item = `
-      <div class="list-group-item">
-        <h5>${shop.shopName}</h5>
-        <p>${shop.shopDescription}</p>
-        <button class="btn btn-success" onclick="approveShop('${shop.id}')">Approve</button>
-        <button class="btn btn-danger" onclick="rejectShop('${shop.id}')">Reject</button>
+      <div class="shop-card">
+        <div class="shop-image-container">
+          <img src="${imageUrl}" alt="${shop.name}" class="shop-image" 
+               onerror="this.src='public/images/default-shop.jpg'">
+        </div>
+        <div class="shop-details">
+          <h5>${shop.name}</h5>
+          <p>${shop.description}</p>
+          <p><strong>Owner:</strong> ${shop.ownerName}</p>
+          <p><strong>Category:</strong> ${shop.category}</p>
+          <div class="shop-actions">
+            <button class="btn btn-success" onclick="approveShop('${shop.id}')">Approve</button>
+            <button class="btn btn-danger" onclick="rejectShop('${shop.id}')">Reject</button>
+          </div>
+        </div>
       </div>`;
     container.insertAdjacentHTML('beforeend', item);
   });
 }
 
+
+
 // Approve Shop
 window.approveShop = async function (shopId) {
   try {
     const shopRef = doc(db, 'shops', shopId);
-    await updateDoc(shopRef, { approved: true });
-    alert('Shop approved!');
+    await updateDoc(shopRef, { 
+      approved: true,
+      status: 'approved',
+      approvedAt: new Date() 
+    });
+    
+    // Also update the owner's user document
+    const ownerRef = doc(db, 'users', shop.ownerId || shop.owner);
+    await updateDoc(ownerRef, {
+      hasApprovedShop: true
+    });
+    
+    alert('Shop approved! Owner can now access their dashboard.');
     const pendingShops = await fetchPendingShops();
     renderPendingShops(pendingShops);
     const approvedShops = await fetchFeaturedShops();
@@ -129,7 +174,7 @@ window.rejectShop = async function (shopId) {
 // Fetch Approved Shops (for Featured Section)
 async function fetchFeaturedShops() {
   try {
-    const q = query(collection(db, 'shops'), where('approved', '==', true));
+    const q = query(collection(db, 'shops'), where('status', '==', 'approved'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
@@ -142,6 +187,7 @@ async function fetchFeaturedShops() {
 function renderFeaturedShops(shops) {
   const container = document.getElementById('featured-shops');
   container.innerHTML = '';
+
   if (shops.length === 0) {
     container.innerHTML = '<p>No approved shops available to feature.</p>';
     return;
@@ -149,19 +195,32 @@ function renderFeaturedShops(shops) {
 
   shops.forEach((shop) => {
     const isFeatured = shop.featured === true;
+    const imageUrl = (Array.isArray(shop.shopImageUrls) && shop.shopImageUrls.length > 0)
+      ? shop.shopImageUrls[0]
+      : shop.shopImage || 'public/images/default-shop.jpg';
+
     const item = `
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          <h5>${shop.shopName}</h5>
-          <p>${shop.shopDescription || ''}</p>
+      <div class="shop-card">
+        <div class="shop-image-container">
+          <img src="${imageUrl}" alt="${shop.name}" class="shop-image"
+               onerror="this.src='public/images/default-shop.jpg'">
         </div>
-        <button class="btn ${isFeatured ? 'btn-warning' : 'btn-primary'}" onclick="toggleFeaturedShop('${shop.id}', ${isFeatured})">
-          ${isFeatured ? 'Unfeature' : 'Feature'}
-        </button>
+        <div class="shop-details">
+          <h5>${shop.name}</h5>
+          <p>${shop.description || 'No description available'}</p>
+          <p><strong>Status:</strong> ${shop.status || 'Active'}</p>
+          <div class="shop-actions">
+            <button class="btn ${isFeatured ? 'btn-warning' : 'btn-primary'}"
+                    onclick="toggleFeaturedShop('${shop.id}', ${isFeatured})">
+              ${isFeatured ? 'Unfeature' : 'Feature'}
+            </button>
+          </div>
+        </div>
       </div>`;
     container.insertAdjacentHTML('beforeend', item);
   });
 }
+
 
 // Toggle Featured Shop
 window.toggleFeaturedShop = async function (shopId, currentlyFeatured) {

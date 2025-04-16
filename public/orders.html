@@ -39,9 +39,42 @@
   </header>
   <main class="container mt-5">
     <h1>Order History</h1>
-    <ul id="order-list" class="list-group mt-3">
-      <!-- Orders will be listed here -->
-    </ul>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="status-filter">Filter by Status</label>
+            <select id="status-filter" class="form-control">
+              <option value="">All Orders</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="date-from">From Date</label>
+            <input type="date" id="date-from" class="form-control">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="date-to">To Date</label>
+            <input type="date" id="date-to" class="form-control">
+          </div>
+        </div>
+        <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
+        <button id="reset-filters" class="btn btn-outline-secondary ml-2">Reset</button>
+      </div>
+    </div>
+
+    <div id="order-list-container">
+      <ul id="order-list" class="list-group">
+        <!-- Orders will be listed here -->
+      </ul>
+      <div id="no-orders" class="alert alert-info mt-3" style="display: none;">
+        No orders found matching your criteria.
+      </div>
+    </div>
   </main>
   <footer class="footer mt-auto py-3 bg-light">
     <div class="container">

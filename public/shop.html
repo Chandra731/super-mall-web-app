@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
   <link rel="stylesheet" href="css/main.css"/>
 
-  <!-- Firebase Config -->
   <script type="module" src="js/shop.js" defer></script>
 </head>
 <body>
@@ -17,14 +16,19 @@
   <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <a class="navbar-brand" href="#">SuperMall</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+              aria-label="Toggle navigation" aria-expanded="false" aria-controls="navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="floor.html">Floors</a></li>
-          <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="cart.html">
+              Cart <span class="cart-count badge badge-pill badge-primary" style="display: none">0</span>
+            </a>
+          </li>
           <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link" href="#" id="logout">Logout</a></li>
         </ul>
@@ -61,5 +65,11 @@
       <span class="text-muted">© 2025 SuperMall</span>
     </div>
   </footer>
-</body>
+  <!-- Add Bootstrap Modal JS requirements -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <!-- Using Font Awesome CDN that supports CORS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </body>
 </html>

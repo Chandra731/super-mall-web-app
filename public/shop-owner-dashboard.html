@@ -7,6 +7,7 @@
   <title>Super Mall - Shop Owner Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script type="module" src="/js/firebase-config.js"></script>
   <style>
     :root {
       --primary: #4361ee;
@@ -141,10 +142,13 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
+          <a class="nav-link active" href="index.html" aria-current="page">Home</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link active" href="#" aria-current="page">Dashboard</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#products-section">Products</a>
+          <a class="nav-link" href="#product-form">Products</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#offers-section">Offers</a>
@@ -160,10 +164,10 @@
             <span id="shop-name-nav"></span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-            <li><a class="dropdown-item" id="shop-owner-profile-link" href="#">Profile</a></li>
+            <li><a class="dropdown-item" href="shop-owner-profile.html">Profile</a></li>
             <li><a class="dropdown-item" href="shop-settings.html">Settings</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+            <li><a class="dropdown-item" href="login.html" id="logout-btn">Logout</a></li>
           </ul>
         </div>
       </div>
@@ -222,8 +226,18 @@
     <h4>📦 Add / Edit Product</h4>
     <button class="btn btn-outline-info" id="view-all-products">View All Products</button>
   </div>
+  
+  <div id="products-loading" class="text-center my-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <div id="products-error" class="alert alert-danger my-4" style="display: none;"></div>
+  
+  <div id="products-content">
 
-  <form id="product-form" aria-label="Product management form">
+  <form id="product-form" aria-label="Product management form" class="mb-4">
     <div class="row g-3">
       <div class="col-md-3">
         <label for="product-name" class="visually-hidden">Product Name</label>
@@ -249,11 +263,23 @@
     <button type="submit" class="btn btn-primary mt-3">Save Product</button>
   </form>
 
+  <div id="product-list" class="row g-4 mt-3"></div>
+  
   <!-- 🔹 Offers Section -->
   <div class="section-title d-flex justify-content-between align-items-center">
     <h4>🎁 Promotions & Offers</h4>
     <button class="btn btn-outline-info" id="view-all-offers">View All Offers</button>
   </div>
+  
+  <div id="offers-loading" class="text-center my-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <div id="offers-error" class="alert alert-danger my-4" style="display: none;"></div>
+  
+  <div id="offers-content">
 
   <form id="offer-form" aria-label="Offer management form">
     <div class="row g-3">
@@ -288,23 +314,23 @@
     <button type="submit" class="btn btn-success mt-3">Create Offer</button>
   </form>
 
+  <ul id="offer-list" class="list-group mb-4"></ul>
+  
   <!-- 🔹 Orders Section -->
   <div class="section-title">
     <h4>🛍️ Orders</h4>
   </div>
-  <div id="orders-section" class="table-responsive">
-    <table class="table table-striped table-bordered" aria-label="Order details">
-      <thead>
-        <tr>
-          <th scope="col">Order ID</th>
-          <th>Customer</th>
-          <th>Items</th>
-          <th>Total ₹</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="orders-table-body"></tbody>
-    </table>
+  
+  <div id="orders-loading" class="text-center my-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <div id="orders-error" class="alert alert-danger my-4" style="display: none;"></div>
+  
+  <div id="orders-content">
+    <div id="order-list" class="row g-4"></div>
   </div>
 </div>
 
@@ -324,34 +350,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-<script type="module" src="shop-owner-dashboard.js"></script>
-<script type="module">
-  import { auth, db } from './js/firebase-config.js';
-  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-  import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
-  
-  document.addEventListener('DOMContentLoaded', async () => {
-    const profileLink = document.getElementById('shop-owner-profile-link');
-    
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Get user data from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          
-          // Set correct profile link based on user type
-          if (userData.isAdmin) {
-            profileLink.href = 'admin-profile.html';
-          } else if (userData.isShopOwner) {
-            profileLink.href = 'profile.html';
-          } else {
-            profileLink.href = 'user-profile.html';
-          }
-        }
-      }
-    });
-  });
+<script type="module" src="/js/shop-owner-dashboard.js"></script>
 </script>
 </body>
 </html>

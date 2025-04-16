@@ -1,90 +1,232 @@
-// shop.js
-import { db } from "./firebase.mjs";
+import { auth, db } from './firebase-config.js';
 import {
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  addDoc,
+  doc,
+  getDoc,
+  setDoc,
+  arrayUnion,
+  arrayRemove,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const shopId = localStorage.getItem("shopId");
-  const shopName = localStorage.getItem("shopName");
-  const productList = document.getElementById("product-list");
-  const searchInput = document.getElementById("search-input");
-  const minPriceInput = document.getElementById("min-price");
-  const maxPriceInput = document.getElementById("max-price");
+const shopFunctions = {
+  comparisonProducts: [],
 
-  if (shopName) {
-    document.getElementById("shop-name").textContent = shopName;
-  }
-
-  async function fetchProducts() {
-    if (!shopId) {
-      console.error("No shopId found in localStorage");
-      return;
-    }
-
-    try {
-      const q = query(collection(db, "products"), where("shopId", "==", shopId));
-      const querySnapshot = await getDocs(q);
-      const products = [];
-
-      querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() });
-      });
-
-      displayProducts(products);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-    }
-  }
-
-  function displayProducts(products) {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    const minPrice = parseFloat(minPriceInput.value);
-    const maxPrice = parseFloat(maxPriceInput.value);
-
-    const filtered = products.filter(product => {
-      const nameMatch = product.productName.toLowerCase().includes(searchTerm);
-      const price = parseFloat(product.productPrice);
-      const minPass = isNaN(minPrice) || price >= minPrice;
-      const maxPass = isNaN(maxPrice) || price <= maxPrice;
-      return nameMatch && minPass && maxPass;
-    });
-
-    productList.innerHTML = "";
-
-    if (filtered.length === 0) {
-      const noData = document.createElement("li");
-      noData.className = "list-group-item text-center";
-      noData.textContent = "No products found.";
-      productList.appendChild(noData);
-      return;
-    }
-
-    filtered.forEach(product => {
-      const li = document.createElement("li");
-      li.className = "list-group-item";
-
-      li.innerHTML = `
-        <div class="d-flex align-items-center">
-          <img src="${product.productImageUrls?.[0] || 'https://via.placeholder.com/80'}" alt="${product.productName}" class="mr-3" style="width: 80px; height: 80px; object-fit: cover;">
-          <div>
-            <h5 class="mb-1">${product.productName}</h5>
-            <p class="mb-1">${product.productDescription}</p>
-            <strong>₹${product.productPrice}</strong>
+  createComparisonModal: function () {
+    const modal = document.createElement('div');
+    modal.id = 'comparisonModal';
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Product Comparison</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="comparisonContent">
+            <p>No products selected for comparison</p>
           </div>
         </div>
-      `;
+      </div>
+    `;
+    document.body.appendChild(modal);
+  },
 
-      productList.appendChild(li);
+  addToCart: async function (product) {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login to add items to cart");
+        return;
+      }
+
+      // Check if product already in cart
+      const cartRef = collection(db, 'carts', user.uid, 'items');
+      const q = query(cartRef, where('productId', '==', product.id));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        alert("This product is already in your cart");
+        return;
+      }
+
+      // Add new item to cart
+      await addDoc(cartRef, {
+        productId: product.id,
+        quantity: 1,
+        addedAt: new Date(),
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl
+      });
+
+      const toast = document.createElement('div');
+      toast.className = 'alert alert-success position-fixed';
+      toast.style.top = '20px';
+      toast.style.right = '20px';
+      toast.style.zIndex = '9999';
+      toast.textContent = `Added ${product.name} to cart!`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+
+      this.updateCartCount();
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  },
+
+  updateCartCount: async function () {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        document.querySelectorAll('.cart-count').forEach(el => {
+          el.style.display = 'none';
+        });
+        return;
+      }
+
+      const cartRef = collection(db, 'carts', user.uid, 'items');
+      const querySnapshot = await getDocs(cartRef);
+      const count = querySnapshot.size;
+
+      document.querySelectorAll('.cart-count').forEach(el => {
+        el.textContent = count;
+        el.style.display = count ? 'inline-block' : 'none';
+      });
+    } catch (error) {
+      console.error("Error updating cart count:", error);
+    }
+  },
+
+  fetchProducts: async function (shopId) {
+    try {
+      const snapshot = await getDocs(
+        query(collection(db, "products"), where("shopId", "==", shopId))
+      );
+      return snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+    } catch (error) {
+      console.error("Error loading products:", error);
+      return [];
+    }
+  },
+
+  renderProducts: function (products) {
+    const productList = document.getElementById("product-list");
+    productList.innerHTML = products.map(product => `
+      <li class="list-group-item" data-product-id="${product.id}">
+        <div class="d-flex align-items-center">
+          <img src="${product.imageUrl || 'placeholder.jpg'}" 
+               class="mr-3" style="width: 80px; height: 80px; object-fit: cover;"
+               alt="${product.name || 'Product image'}">
+          <div class="flex-grow-1">
+            <h5>${product.name || "Unnamed Product"}</h5>
+            <p>${product.description || ""}</p>
+            <strong>₹${product.price || "0"}</strong>
+          </div>
+          <div class="btn-group ml-2" role="group">
+            <button class="btn btn-primary add-to-cart" title="Add to Cart">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+            <button class="btn btn-outline-secondary compare-btn" title="Compare">
+              <i class="fas fa-balance-scale"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+    `).join('');
+
+    // Add event listeners
+    productList.querySelectorAll('li').forEach(li => {
+      const productId = li.getAttribute('data-product-id');
+      const product = products.find(p => p.id === productId);
+
+      li.querySelector('.add-to-cart').addEventListener('click', () => {
+        this.addToCart(product);
+      });
+
+      li.querySelector('.compare-btn').addEventListener('click', () => {
+        this.addToComparison(product);
+      });
     });
+  },
+
+  addToComparison: function (product) {
+    if (this.comparisonProducts.some(p => p.id === product.id)) {
+      alert("This product is already selected for comparison");
+      return;
+    }
+
+    this.comparisonProducts.push(product);
+
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-info position-fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '9999';
+    toast.textContent = `Added ${product.name} to comparison (${this.comparisonProducts.length}/2)`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+
+    if (this.comparisonProducts.length >= 2) {
+      const compareBtn = document.getElementById('compareBtn');
+      if (compareBtn) {
+        compareBtn.style.display = 'block';
+        compareBtn.onclick = () => this.showComparison();
+      }
+    }
+  },
+
+  showComparison: function () {
+    const modalContent = document.getElementById('comparisonContent');
+    modalContent.innerHTML = `
+      <div class="row">
+        ${this.comparisonProducts.map(product => `
+          <div class="col-md-6">
+            <h4>${product.name}</h4>
+            <img src="${product.imageUrl}" class="img-fluid mb-3" alt="${product.name}">
+            <p><strong>Price:</strong> ₹${product.price}</p>
+            <p>${product.description || 'No description available'}</p>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    $('#comparisonModal').modal('show');
+  },
+
+  init: async function () {
+    const shopId = new URLSearchParams(window.location.search).get("id");
+    if (!shopId) {
+      document.getElementById("shop-name").textContent = "Shop Not Found";
+      return;
+    }
+
+    this.createComparisonModal();
+    const products = await this.fetchProducts(shopId);
+    this.updateCartCount();
+    this.renderProducts(products);
   }
+};
 
-  searchInput.addEventListener("input", fetchProducts);
-  minPriceInput.addEventListener("input", fetchProducts);
-  maxPriceInput.addEventListener("input", fetchProducts);
+// DOM Ready
+document.addEventListener("DOMContentLoaded", () => {
+  const compareBtn = document.createElement('button');
+  compareBtn.id = 'compareBtn';
+  compareBtn.className = 'btn btn-info position-fixed';
+  compareBtn.style.bottom = '20px';
+  compareBtn.style.right = '20px';
+  compareBtn.style.display = 'none';
+  compareBtn.innerHTML = '<i class="fas fa-balance-scale"></i> Compare Products';
+  document.body.appendChild(compareBtn);
 
-  fetchProducts();
+  shopFunctions.init();
 });

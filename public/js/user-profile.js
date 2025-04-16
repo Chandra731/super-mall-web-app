@@ -51,16 +51,17 @@ document.addEventListener('DOMContentLoaded', async function() {
           formData.append('userId', user.uid);
           formData.append('type', 'user');
 
-          const response = await fetch('/upload-profile-image', {
+          const response = await fetch('http://localhost:5001/upload/profile', {
             method: 'POST',
             body: formData
           });
 
           const result = await response.json();
           if (result.success) {
-            profilePic.src = result.imageUrl;
+            const imageUrl = result.urls[0];
+            profilePic.src = imageUrl;
             await setDoc(doc(db, 'users', user.uid), {
-              profileImage: result.imageUrl
+              profileImage: imageUrl
             }, { merge: true });
           }
         } catch (error) {
