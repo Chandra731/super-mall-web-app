@@ -162,6 +162,3 @@ These roles are enforced through Firestore security rules and reflected in the f
 
 SuperMall is a well-structured e-commerce platform leveraging modern cloud technologies and integrations. The use of Firebase for authentication, database, and hosting simplifies backend complexity while providing scalability. Razorpay integration ensures secure payment processing. The Dialogflow AI assistant adds an innovative conversational layer enhancing user experience. The modular frontend architecture with Firebase SDK enables responsive and dynamic user interactions. Overall, the system demonstrates a comprehensive full-stack solution for an online mall platform.
 
----
-
-*End of Report*
