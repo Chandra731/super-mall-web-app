@@ -1,0 +1,121 @@
+<!-- Chatbot UI snippet for integration into your main HTML -->
+
+<style>
+  /* Chatbot UI styles */
+  #chatbot-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  z-index: 1050;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  padding: 0;
+}
+#chatbot-button img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+  #chatbot-window {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 320px;
+    max-height: 400px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    display: none;
+    flex-direction: column;
+    z-index: 1050;
+  }
+  #chatbot-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #chatbot-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 14px;
+  }
+  .chatbot-message {
+    margin-bottom: 10px;
+    clear: both;
+  }
+  .chatbot-message.user {
+    text-align: right;
+  }
+  .chatbot-message.bot {
+    text-align: left;
+  }
+  .chatbot-message .message-text {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 80%;
+  }
+  .chatbot-message.user .message-text {
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 0;
+  }
+  .chatbot-message.bot .message-text {
+    background-color: #e5e5ea;
+    color: black;
+    border-bottom-left-radius: 0;
+  }
+  #chatbot-input-area {
+    display: flex;
+    border-top: 1px solid #ddd;
+  }
+  #chatbot-input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    border-bottom-left-radius: 10px;
+  }
+  #chatbot-send-button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 0 15px;
+    cursor: pointer;
+    font-size: 16px;
+    border-bottom-right-radius: 10px;
+  }
+  #chatbot-send-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+</style>
+
+<button id="chatbot-button" aria-label="Open chat">
+  <img src="images/chatbot.png" alt="Chatbot Avatar" />
+</button>
+<div id="chatbot-window" role="region" aria-live="polite" aria-label="Chatbot window">
+  <div id="chatbot-header">
+    <span>SuperMall Assistant</span>
+    <button id="chatbot-close" aria-label="Close chat">&times;</button>
+  </div>
+  <div id="chatbot-messages"></div>
+  <div id="chatbot-input-area">
+    <input type="text" id="chatbot-input" placeholder="Type your message..." aria-label="Chat input" />
+    <button id="chatbot-send-button" disabled>Send</button>
+  </div>
+</div>

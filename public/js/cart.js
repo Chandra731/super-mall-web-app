@@ -11,7 +11,8 @@ import {
   doc,
   getDoc,
   deleteDoc,
-  updateDoc
+  updateDoc,
+  where
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 let orderItems = [];
@@ -94,7 +95,7 @@ function updateTotalDisplay() {
   if (totalContainer) {
     totalContainer.innerHTML = `
       <strong>Total Items:</strong> ${itemCount}<br>
-      <strong>Total Price:</strong> $${total.toFixed(2)}
+      <strong>Total Price:</strong> ₹${total.toFixed(2)}
     `;
   }
 }
@@ -161,62 +162,51 @@ document.getElementById('checkout-button').addEventListener('click', async () =>
     return;
   }
 
-  orderItems = [];
-  total = 0;
-  itemCount = 0;
+    orderItems = [];
+    total = 0;
+    itemCount = 0;
 
-  for (const cartDoc of cartSnapshot.docs) {
-    const cartItem = cartDoc.data();
-    const productDoc = await getDoc(doc(db, 'products', cartItem.productId));
-    
-    if (!productDoc.exists()) {
-      alert(`Product ${cartItem.productId} no longer exists. Please remove it from your cart.`);
-      return;
+    for (const cartDoc of cartSnapshot.docs) {
+      const cartItem = cartDoc.data();
+      const productDoc = await getDoc(doc(db, 'products', cartItem.productId));
+      
+      if (!productDoc.exists()) {
+        alert(`Product ${cartItem.productId} no longer exists. Please remove it from your cart.`);
+        return;
+      }
+
+      const product = productDoc.data();
+      total += product.price * cartItem.quantity;
+      itemCount += cartItem.quantity;
+      orderItems.push({
+        productId: cartItem.productId,
+        name: product.name,
+        price: product.price,
+        quantity: cartItem.quantity,
+        image: product.imageUrl,
+        shopId: product.shopId || null
+      });
     }
 
-    const product = productDoc.data();
-    total += product.price * cartItem.quantity;
-    itemCount += cartItem.quantity;
-    orderItems.push({
-      productId: cartItem.productId,
-      name: product.name,
-      price: product.price,
-      quantity: cartItem.quantity,
-      image: product.imageUrl
-    });
-  }
-
-  document.getElementById('checkout-summary').innerHTML = `
-    <strong>Total Items:</strong> ${itemCount}<br>
-    <strong>Total Price:</strong> $${total.toFixed(2)}
-  `;
-  $('#checkoutModal').modal('show');
+    document.getElementById('checkout-summary').innerHTML = `
+      <strong>Total Items:</strong> ${itemCount}<br>
+      <strong>Total Price:</strong> ₹${total.toFixed(2)}
+    `;
+    $('#checkoutModal').modal('show');
 });
 
-// Pay Now button
 document.getElementById('pay-now-button').addEventListener('click', async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  try {
-    const orderRef = doc(collection(db, 'orders'));
-    await setDoc(orderRef, {
-      userId: user.uid,
-      items: orderItems,
-      total: total,
-      status: 'paid',
-      createdAt: new Date()
-    });
-
-    const cartRef = collection(db, 'carts', user.uid, 'items');
-    const cartSnapshot = await getDocs(cartRef);
-    const deletions = cartSnapshot.docs.map(docSnap => deleteDoc(doc(cartRef, docSnap.id)));
-    await Promise.all(deletions);
-
-    $('#checkoutModal').modal('hide');
-    window.location.href = 'orders.html';
-  } catch (error) {
-    console.error('Checkout error:', error);
-    alert('Payment failed. Please try again.');
+  if (orderItems.length === 0) {
+    alert("No items in order. Cannot proceed to payment.");
+    return;
   }
+  // Save order data to sessionStorage and redirect to payment page
+  const orderData = {
+    id: null, // Will be created after payment
+    items: orderItems,
+    total: total
+  };
+  sessionStorage.setItem('orderData', JSON.stringify(orderData));
+  $('#checkoutModal').modal('hide');
+  window.location.href = 'payment.html';
 });

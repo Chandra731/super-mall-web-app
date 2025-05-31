@@ -1,0 +1,71 @@
+{
+  "displayName": "Admin_Approve_Shop",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "approve-shop-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "I want to approve a shop"
+        }
+      ]
+    },
+    {
+      "name": "approve-shop-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I approve new shops?"
+        }
+      ]
+    },
+    {
+      "name": "approve-shop-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me approve shop registrations"
+        }
+      ]
+    },
+    {
+      "name": "approve-shop-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to approve shops"
+        }
+      ]
+    },
+    {
+      "name": "approve-shop-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What are the steps to approve shops?"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To approve shops, go to the Admin Dashboard and click on 'Approve Shops'. You will see a list of pending shop registrations. Select a shop to review its details and click 'Approve' or 'Reject'. Would you like help with reviewing a specific shop?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/approveshop-followup",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}

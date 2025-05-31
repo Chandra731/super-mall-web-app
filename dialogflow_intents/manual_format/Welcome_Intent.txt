@@ -1,0 +1,25 @@
+Intent Name: Welcome_Intent
+
+Training Phrases:
+- Hi
+- Hello
+- Hey there
+- Good morning
+- Good evening
+- What's up?
+- Hi there
+- Hello there
+- Greetings
+- Hey
+- Howdy
+- Welcome
+- Nice to meet you
+- Good to see you
+- How can you help me?
+
+Responses:
+- Hello! I'm Divya, your SuperMall AI assistant. How can I help you today?
+- Hi there! Welcome to SuperMall. What can I assist you with?
+- Greetings! I'm here to help you shop, manage your orders, or answer any questions.
+- Welcome! Feel free to ask me anything about our products or services.
+- Hi! Let me know if you need help finding something or managing your account.

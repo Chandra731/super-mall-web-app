@@ -1,0 +1,74 @@
+{
+  "displayName": "Welcome_Intent",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_UNSPECIFIED",
+  "trainingPhrases": [
+    {
+      "name": "welcome-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Hi"
+        }
+      ]
+    },
+    {
+      "name": "welcome-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Hello"
+        }
+      ]
+    },
+    {
+      "name": "welcome-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Hey there"
+        }
+      ]
+    },
+    {
+      "name": "welcome-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Good morning"
+        }
+      ]
+    },
+    {
+      "name": "welcome-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Good evening"
+        }
+      ]
+    },
+    {
+      "name": "welcome-phrase-6",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What's up?"
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "Hello! I'm Divya, your SuperMall AI assistant. How can I help you today?",
+          "Hi there! Welcome to SuperMall. What can I assist you with?",
+          "Greetings! I'm here to help you shop, manage your orders, or answer any questions."
+        ]
+      }
+    }
+  ]
+}

@@ -1,4 +1,3 @@
-// shop-owner-dashboard.js
 import { auth, db } from './firebase-config.js';
 import { 
   onAuthStateChanged,
@@ -6,135 +5,369 @@ import {
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 import {
   collection, addDoc, getDocs, doc, getDoc,
-  updateDoc, query, where, orderBy, serverTimestamp
+  updateDoc, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Get shop ID from authenticated user
-let shopId;
+let currentShopId = null;
+
 onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    // User not logged in, redirect to login page or handle accordingly
+    window.location.href = "login.html";
+    return;
+  }
+
   try {
-    if (user) {
-      console.log("User ID:", user.uid); // Log user ID
-      const shopQuery = query(collection(db, "shops"),
-        where("ownerId", "==", user.uid),
-        where("approved", "==", true));
-      const shopSnapshot = await getDocs(shopQuery);
-      
-      if (!shopSnapshot.empty) {
-        shopId = shopSnapshot.docs[0].id;
-        loadDashboardMetrics();
-        loadShopName();
-      } else {
-        console.warn("No approved shop found for user");
-        // Optionally redirect to registration or show message
+    console.log("User ID:", user.uid); // Log user ID
+    const shopQuery = query(collection(db, "shops"),
+      where("ownerId", "==", user.uid),
+      where("approved", "==", true));
+    const shopSnapshot = await getDocs(shopQuery);
+
+    if (shopSnapshot.empty) {
+      console.warn("No approved shop found for user");
+      // Optionally redirect to registration or show message
+      return;
+    }
+
+    currentShopId = shopSnapshot.docs[0].id;
+
+    // Define functions inside onAuthStateChanged to have access to currentShopId
+
+    async function loadDashboardMetrics() {
+      console.log("loadDashboardMetrics started");
+      const metricsLoading = document.getElementById("metrics-loading");
+      const metricsContent = document.getElementById("metrics-content");
+      if (metricsLoading) metricsLoading.style.display = "block";
+      if (metricsContent) metricsContent.style.display = "none";
+
+      try {
+        const ordersQuery = query(collection(db, "orders"), where("shopId", "==", currentShopId));
+        const ordersSnapshot = await getDocs(ordersQuery);
+
+        let totalSales = 0;
+        let totalOrders = 0;
+        let customers = new Set();
+        let productSales = {};
+
+        ordersSnapshot.forEach(doc => {
+          const data = doc.data();
+            console.log("Order data:", data);
+          totalOrders++;
+          if (data.status === "paid" || data.status === "delivered") {
+            totalSales += data.total;
+          }
+          customers.add(data.userId);
+
+          data.items.forEach(item => {
+            if (!productSales[item.productId]) {
+              productSales[item.productId] = { name: item.name, quantity: 0 };
+            }
+            productSales[item.productId].quantity += item.quantity;
+          });
+        });
+
+        let topProduct = Object.values(productSales).sort((a, b) => b.quantity - a.quantity)[0];
+
+        document.getElementById("total-sales").textContent = `₹${totalSales}`;
+        document.getElementById("total-orders").textContent = totalOrders;
+        document.getElementById("customers-visited").textContent = customers.size;
+        document.getElementById("top-product").textContent = topProduct?.name || "N/A";
+
+        if (metricsLoading) metricsLoading.style.display = "none";
+        if (metricsContent) metricsContent.style.display = "block";
+        console.log("loadDashboardMetrics completed");
+      } catch (error) {
+        console.error("Error loading metrics:", error);
+        if (metricsLoading) metricsLoading.style.display = "none";
+        const metricsError = document.getElementById("metrics-error");
+        if (metricsError) metricsError.style.display = "block";
       }
     }
+
+async function loadOrders() {
+  console.log("loadOrders started");
+  const ordersLoading = document.getElementById("orders-loading");
+  const ordersContent = document.getElementById("orders-content");
+  const ordersError = document.getElementById("orders-error");
+  const orderList = document.getElementById("order-list");
+
+  if (ordersLoading) ordersLoading.style.display = "block";
+  if (ordersContent) ordersContent.style.display = "none";
+  if (ordersError) ordersError.style.display = "none";
+  if (orderList) orderList.innerHTML = "";
+
+  try {
+    const snapshot = await getDocs(query(collection(db, "orders"), where("shopId", "==", currentShopId)));
+
+    if (orderList) {
+      snapshot.forEach((doc) => {
+        const o = doc.data();
+
+        // Build product details string
+        let productDetails = '';
+        if (o.items && Array.isArray(o.items)) {
+          productDetails = '<ul>';
+          o.items.forEach(item => {
+            productDetails += `<li>${item.name} - Quantity: ${item.quantity}</li>`;
+          });
+          productDetails += '</ul>';
+        }
+
+        const item = document.createElement("div");
+        item.className = "col-md-4 mb-4";
+        item.innerHTML = `
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Order #${doc.id}</h5>
+              <p class="card-text">Customer: ${o.userId}</p>
+              <p class="card-text">Total: ₹${o.total}</p>
+              <p class="card-text">Products: ${productDetails}</p>
+              <div class="form-group">
+                <label>Status:</label>
+                <select class="form-control" onchange="updateOrderStatus('${doc.id}', this.value)">
+                  <option value="pending" ${o.status === "pending" ? "selected" : ""}>Pending</option>
+                  <option value="paid" ${o.status === "paid" ? "selected" : ""}>Paid</option>
+                  <option value="shipped" ${o.status === "shipped" ? "selected" : ""}>Shipped</option>
+                  <option value="delivered" ${o.status === "delivered" ? "selected" : ""}>Delivered</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+        orderList.appendChild(item);
+      });
+    }
+
+    if (ordersLoading) ordersLoading.style.display = "none";
+    if (ordersContent) ordersContent.style.display = "block";
+    console.log("loadOrders completed");
+  } catch (error) {
+    console.error("Error loading orders:", error);
+    if (ordersLoading) ordersLoading.style.display = "none";
+    if (ordersError) ordersError.style.display = "block";
+  }
+}
+
+    async function loadShopName() {
+      try {
+        const shopDoc = await getDoc(doc(db, "shops", currentShopId));
+        if (shopDoc.exists()) {
+          const shopName = shopDoc.data().name;
+          document.getElementById("shop-name-display").textContent = shopName;
+          document.getElementById("shop-name-nav").textContent = shopName;
+        } else {
+          console.error("Shop document not found");
+        }
+      } catch (error) {
+        console.error("Error loading shop name:", error);
+      }
+    }
+
+    // Call initial loading functions
+    loadDashboardMetrics();
+    loadShopName();
+    loadOrders();
+
+    // New function to load sales and revenue data and render charts
+    async function loadSalesRevenueData() {
+      try {
+        const ordersQuery = query(collection(db, "orders"), where("shopId", "==", currentShopId));
+        const ordersSnapshot = await getDocs(ordersQuery);
+
+        let salesByMonth = {};
+        let revenueByMonth = {};
+
+        ordersSnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.status === "paid" || data.status === "delivered") {
+            const createdAt = data.createdAt ? data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt) : new Date();
+            const monthKey = createdAt.getFullYear() + "-" + String(createdAt.getMonth() + 1).padStart(2, "0");
+
+            salesByMonth[monthKey] = (salesByMonth[monthKey] || 0) + 1;
+            revenueByMonth[monthKey] = (revenueByMonth[monthKey] || 0) + data.total;
+          }
+        });
+
+        renderSalesRevenueCharts(salesByMonth, revenueByMonth);
+      } catch (error) {
+        console.error("Error loading sales and revenue data:", error);
+      }
+    }
+
+    loadSalesRevenueData();
+
+    // Initialize event listeners that depend on currentShopId here if needed
+
   } catch (error) {
     console.error("Error loading shop data:", error);
     alert("Error loading shop data. Please try again or contact support.");
   }
 });
 
-// ✅ 1. Dashboard Metrics
-async function loadDashboardMetrics() {
-  console.log("Loading dashboard metrics...");
-  console.log("Current shopId:", shopId); // Log shopId
-  
-  // Safely handle missing elements
-  const metricsLoading = document.getElementById("metrics-loading");
-  const metricsContent = document.getElementById("metrics-content");
-  
-  if (metricsLoading && metricsContent) {
-    metricsLoading.style.display = "block";
-    metricsContent.style.display = "none";
-  }
-  
+// Define updateOrderStatus globally since it is used in inline onchange handlers
+// Define updateOrderStatus globally since it is used in inline onchange handlers
+window.updateOrderStatus = async function (orderId, newStatus) {
   try {
-    if (!shopId) {
-      throw new Error("shopId is not defined");
-    }
-    
-    console.log("Querying orders for shop:", shopId);
-    const ordersQuery = query(
-      collection(db, "orders"),
-      where("shopId", "==", shopId)
-    );
-    const ordersSnapshot = await getDocs(ordersQuery);
-
-  let totalSales = 0;
-  let totalOrders = 0;
-  let customers = new Set();
-  let productSales = {};
-
-  ordersSnapshot.forEach(doc => {
-    const data = doc.data();
-    totalOrders++;
-    if (data.status === "Delivered") {
-      totalSales += data.total;
-    }
-    customers.add(data.customerId);
-
-    data.items.forEach(item => {
-      if (!productSales[item.productId]) {
-        productSales[item.productId] = { name: item.name, quantity: 0 };
-      }
-      productSales[item.productId].quantity += item.quantity;
-    });
-  });
-
-  // Find Top Product
-  let topProduct = Object.values(productSales).sort((a, b) => b.quantity - a.quantity)[0];
-
-  document.getElementById("total-sales").textContent = `₹${totalSales}`;
-  document.getElementById("total-orders").textContent = totalOrders;
-  document.getElementById("customers-visited").textContent = customers.size;
-  document.getElementById("top-product").textContent = topProduct?.name || "N/A";
-  
-  // Safely hide loading state
-  const metricsLoading = document.getElementById("metrics-loading");
-  const metricsContent = document.getElementById("metrics-content");
-  const metricsError = document.getElementById("metrics-error");
-  
-  if (metricsLoading) metricsLoading.style.display = "none";
-  if (metricsContent) metricsContent.style.display = "block";
-  if (metricsError) metricsError.style.display = "none";
+    await updateDoc(doc(db, "orders", orderId), { status: newStatus });
+    alert("Order status updated");
   } catch (error) {
-    console.error("Error loading metrics:", error);
-    const metricsLoading = document.getElementById("metrics-loading");
-    const metricsError = document.getElementById("metrics-error");
-    
-    if (metricsLoading) metricsLoading.style.display = "none";
-    if (metricsError) metricsError.style.display = "block";
+    console.error("Error updating order status:", error);
+    alert("Failed to update order status.");
   }
-}
+};
 
-// 🔹 2. Predictive Charts
-function renderCharts() {
-  const ctx = document.getElementById("salesChart").getContext("2d");
-  new Chart(ctx, {
+// Define other functions that do not depend on shopId outside onAuthStateChanged, e.g., renderCharts, initializeEventListeners, handleProductSubmit, loadAllProducts, loadOffers, etc.
+
+// Added real sales and revenue charts rendering with aggregated data
+let salesChartInstance = null;
+
+function renderSalesRevenueCharts(salesByMonth, revenueByMonth) {
+  const salesCtx = document.getElementById("salesChart").getContext("2d");
+
+  // Prepare labels sorted by month
+  const months = Object.keys(salesByMonth).sort();
+  const salesData = months.map(m => salesByMonth[m]);
+  const revenueData = months.map(m => revenueByMonth[m]);
+
+  if (salesChartInstance) {
+    salesChartInstance.destroy();
+  }
+  salesChartInstance = new Chart(salesCtx, {
     type: 'line',
     data: {
-      labels: ["Jan", "Feb", "Mar", "Apr"],
-      datasets: [{
-        label: "Sales",
-        data: [1200, 2100, 1800, 2500],
-        borderColor: "blue"
-      }]
+      labels: months,
+      datasets: [
+        {
+          label: 'Sales',
+          data: salesData,
+          borderColor: 'blue',
+          fill: false,
+        },
+        {
+          label: 'Revenue',
+          data: revenueData,
+          borderColor: 'green',
+          fill: false,
+        }
+      ]
     },
     options: {
-      responsive: true
+      responsive: true,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Month'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Amount'
+          },
+          beginAtZero: true
+        }
+      }
     }
   });
 }
 
-// 🔹 3. Product Management
-const productForm = document.getElementById("product-form");
-if (productForm) {
-  productForm.addEventListener("submit", handleProductSubmit);
+function initializeEventListenersMain() {
+  console.log("Initializing main event listeners...");
+  const viewProductsBtn = document.getElementById("view-all-products");
+  if (viewProductsBtn) {
+    viewProductsBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      loadAllProducts(currentShopId);
+    });
+  }
+  const viewOffersBtn = document.getElementById("view-all-offers");
+  if (viewOffersBtn) viewOffersBtn.addEventListener("click", () => loadOffers(currentShopId));
+  const viewOrdersBtn = document.getElementById("view-orders");
+  if (viewOrdersBtn) viewOrdersBtn.addEventListener("click", () => loadOrders(currentShopId));
+  const productForm = document.getElementById("product-form");
+  if (productForm) {
+    productForm.addEventListener("submit", (e) => {
+      console.log("Product form submitted");
+      handleProductSubmit(e);
+    });
+  }
+  const offerForm = document.getElementById("offer-form");
+  if (offerForm) {
+    offerForm.addEventListener("submit", async (e) => {
+      console.log("Offer form submitted");
+      e.preventDefault();
+      const name = document.getElementById("offer-name").value;
+      const description = document.getElementById("offer-description").value;
+      const discount = parseFloat(document.getElementById("offer-discount").value);
+      const type = document.getElementById("offer-type").value;
+
+      try {
+        const offerRef = await addDoc(collection(db, "offers"), {
+          shopId: currentShopId,
+          name,
+          description,
+          type,
+          discount: Number(discount),
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          createdAt: serverTimestamp(),
+          ownerId: auth.currentUser.uid
+        });
+        alert("Offer created successfully!");
+        e.target.reset();
+        await loadOffers(currentShopId);
+      } catch (error) {
+        console.error("Error creating offer: ", error);
+        alert("Failed to create offer: " + error.message);
+      }
+    });
+  }
 }
+
+import './shop-owner-report.js';
+
+function initializeEventListenersReport() {
+  const viewReportBtn = document.getElementById("view-report");
+  if (viewReportBtn) {
+    viewReportBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "./shop-owner-report.html";
+    });
+  }
+  // existing event listeners...
+}
+
+// Call initialization on window load
+window.onload = () => {
+  // renderCharts(); // Commented out because renderCharts is not defined
+  initializeEventListenersMain();
+  initializeEventListenersReport();
+  // Do not call loadDashboardMetrics or loadOrders here; they are called after shopId is set
+};
+
+// Add button event listener to navigate to report page
+function initializeEventListeners() {
+  const viewReportBtn = document.getElementById("view-report");
+  if (viewReportBtn) {
+    viewReportBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "shop-owner-report.html";
+    });
+  }
+  // existing event listeners...
+}
+
+// Added back missing functions for loading products and offers
 
 async function handleProductSubmit(e) {
   e.preventDefault();
+
+  if (!currentShopId) {
+    alert("Shop ID not available. Please try again later.");
+    return;
+  }
 
   const name = document.getElementById("product-name")?.value.trim();
   const price = parseFloat(document.getElementById("product-price")?.value);
@@ -176,13 +409,16 @@ async function handleProductSubmit(e) {
     const res = await fetch("http://localhost:5001/upload/products", {
       method: "POST",
       body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
     });
 
     if (!res.ok) throw new Error("Image upload failed");
     const { imageUrl } = await res.json(); // This must be the accessible public path
 
     await addDoc(collection(db, "products"), {
-      shopId,
+      shopId: currentShopId,
       name,
       price,
       description,
@@ -195,7 +431,7 @@ async function handleProductSubmit(e) {
 
     e.target.reset();
     if (previewContainer) previewContainer.innerHTML = "";
-    await loadAllProducts();
+    await loadAllProducts(currentShopId);
     alert("Product added successfully!");
   } catch (err) {
     console.error(err);
@@ -208,9 +444,7 @@ async function handleProductSubmit(e) {
   }
 }
 
-
-// 🔹 4. View All Products
-async function loadAllProducts() {
+async function loadAllProducts(shopId) {
   const productsLoading = document.getElementById("products-loading");
   const productsContent = document.getElementById("products-content");
   const productsError = document.getElementById("products-error");
@@ -235,18 +469,22 @@ async function loadAllProducts() {
             ? p.imageUrl
             : "public/images/default-product.jpg";
 
+        const outOfStock = p.quantity <= 0;
+
         const item = document.createElement("div");
         item.className = "col-md-3 mb-4";
         item.innerHTML = `
-          <div class="card h-100">
+          <div class="card h-100 ${outOfStock ? 'border-danger' : ''}">
             <img src="${imageUrl}" class="card-img-top" alt="${p.name}"
-                 style="height: 200px; object-fit: cover;"
+                 style="height: 200px; object-fit: cover; ${outOfStock ? 'opacity: 0.5;' : ''}"
                  onerror="this.src='public/images/default-product.jpg';">
             <div class="card-body">
               <h5 class="card-title">${p.name}</h5>
               <p class="card-text">Price: ₹${p.price}</p>
               <p class="card-text">Stock: ${p.quantity}</p>
+              ${outOfStock ? '<p class="text-danger fw-bold">Out of Stock</p>' : ''}
               <p class="card-text text-muted">${p.description}</p>
+              <button class="btn btn-primary btn-sm mt-2 edit-product-btn" data-id="${doc.id}">Edit</button>
             </div>
           </div>
         `;
@@ -263,57 +501,7 @@ async function loadAllProducts() {
   }
 }
 
-// Initialize button event listeners when DOM is loaded
-function initializeEventListeners() {
-  const viewProductsBtn = document.getElementById("view-all-products");
-  if (viewProductsBtn) {
-    viewProductsBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      loadAllProducts();
-    });
-  }
-}
-
-// Call initialization when window loads
-window.onload = () => {
-  loadShopName();
-  loadDashboardMetrics();
-  renderCharts();
-  initializeEventListeners(); // Add this line
-};
-
-// 🔹 5. Promotions / Offers
-const offerForm = document.getElementById("offer-form");
-if (offerForm) offerForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = document.getElementById("offer-name").value;
-  const description = document.getElementById("offer-description").value;
-  const discount = parseFloat(document.getElementById("offer-discount").value);
-  const type = document.getElementById("offer-type").value;
-
-  try {
-    const offerRef = await addDoc(collection(db, "offers"), {
-      shopId,
-      name,
-      description,
-      type,
-      discount: Number(discount),
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      createdAt: serverTimestamp(),
-      ownerId: auth.currentUser.uid
-    });
-    console.log("Offer created with ID: ", offerRef.id);
-    alert("Offer created successfully!");
-    e.target.reset();
-    await loadOffers();
-  } catch (error) {
-    console.error("Error creating offer: ", error);
-    alert("Failed to create offer: " + error.message);
-  }
-});
-
-async function loadOffers() {
+async function loadOffers(shopId) {
   // Show loading state
   document.getElementById("offers-loading").style.display = "block";
   document.getElementById("offers-content").style.display = "none";
@@ -341,177 +529,106 @@ async function loadOffers() {
   }
 }
 
-const viewOffersBtn = document.getElementById("view-all-offers");
-if (viewOffersBtn) viewOffersBtn.addEventListener("click", loadOffers);
+document.addEventListener("click", async (e) => {
+  if (e.target && e.target.classList.contains("edit-product-btn")) {
+    const productId = e.target.getAttribute("data-id");
+    if (!productId) return;
 
-// 🔹 6. Orders Section
-async function loadOrders() {
-  // Show loading state
-  document.getElementById("orders-loading").style.display = "block";
-  document.getElementById("orders-content").style.display = "none";
-  
-  const orderList = document.getElementById("order-list");
-  orderList.innerHTML = "";
+    // Fetch product data
+    const productRef = doc(db, "products", productId);
+    const productSnap = await getDoc(productRef);
+    if (!productSnap.exists()) {
+      alert("Product not found");
+      return;
+    }
+    const productData = productSnap.data();
 
-  try {
-    const snapshot = await getDocs(query(collection(db, "orders"), where("shopId", "==", shopId)));
-
-    snapshot.forEach(docSnap => {
-      const o = docSnap.data();
-      const orderCard = document.createElement("div");
-      orderCard.className = "col-md-4 mb-4";
-      orderCard.innerHTML = `
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Order #${docSnap.id}</h5>
-            <p class="card-text">Customer: ${o.customerName}</p>
-            <p class="card-text">Total: ₹${o.total}</p>
-            <div class="form-group">
-              <label>Status:</label>
-              <select class="form-control" onchange="updateOrderStatus('${docSnap.id}', this.value)">
-                <option value="Pending" ${o.status === "Pending" ? "selected" : ""}>Pending</option>
-                <option value="Shipped" ${o.status === "Shipped" ? "selected" : ""}>Shipped</option>
-                <option value="Delivered" ${o.status === "Delivered" ? "selected" : ""}>Delivered</option>
-              </select>
-            </div>
+    // Create and show edit form modal
+    let modal = document.getElementById("editProductModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "editProductModal";
+      modal.className = "modal fade";
+      modal.tabIndex = -1;
+      modal.setAttribute("role", "dialog");
+      modal.innerHTML = `
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form id="editProductForm">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="editProductName" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="editProductName" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editProductPrice" class="form-label">Price</label>
+                  <input type="number" class="form-control" id="editProductPrice" min="0" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editProductQuantity" class="form-label">Quantity</label>
+                  <input type="number" class="form-control" id="editProductQuantity" min="0" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editProductDescription" class="form-label">Description</label>
+                  <textarea class="form-control" id="editProductDescription" rows="3" required></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </form>
           </div>
         </div>
       `;
-      orderList.appendChild(orderCard);
-    });
-
-    // Hide loading state
-    document.getElementById("orders-loading").style.display = "none";
-    document.getElementById("orders-content").style.display = "block";
-  } catch (error) {
-    console.error("Error loading orders:", error);
-    document.getElementById("orders-loading").style.display = "none";
-    document.getElementById("orders-error").style.display = "block";
-  }
-}
-
-window.updateOrderStatus = async function (orderId, newStatus) {
-  await updateDoc(doc(db, "orders", orderId), { status: newStatus });
-  alert("Order status updated");
-};
-
-const viewOrdersBtn = document.getElementById("view-orders");
-if (viewOrdersBtn) viewOrdersBtn.addEventListener("click", loadOrders);
-
-// 🔹 Get Shop Name
-async function loadShopName() {
-  try {
-    if (!shopId) {
-      console.error("Shop ID not available");
-      return;
+      document.body.appendChild(modal);
     }
-    
-    const shopDoc = await getDoc(doc(db, "shops", shopId));
-    if (shopDoc.exists()) {
-      const shopName = shopDoc.data().name;
-      document.getElementById("shop-name-display").textContent = shopName;
-      document.getElementById("shop-name-nav").textContent = shopName;
-    } else {
-      console.error("Shop document not found");
-    }
-  } catch (error) {
-    console.error("Error loading shop name:", error);
-  }
-}
 
-// 🔹 Handle Logout
-const logoutBtn = document.getElementById("logout-btn");
-if (logoutBtn) logoutBtn.addEventListener("click", async (e) => {
-  e.preventDefault();
-  try {
-    await signOut(auth);
-    window.location.href = "login.html";
-  } catch (error) {
-    console.error("Logout error:", error);
-    alert("Error during logout. Please try again.");
-  }
-});
+    // Fill form with product data
+    document.getElementById("editProductName").value = productData.name || "";
+    document.getElementById("editProductPrice").value = productData.price || 0;
+    document.getElementById("editProductQuantity").value = productData.quantity || 0;
+    document.getElementById("editProductDescription").value = productData.description || "";
 
-// 🔹 Smooth scrolling for navigation links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  if (anchor) {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth'
-        });
+    // Show modal using Bootstrap's modal API
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+
+    // Handle form submission
+    const form = document.getElementById("editProductForm");
+    form.onsubmit = async (event) => {
+      event.preventDefault();
+
+      const updatedName = document.getElementById("editProductName").value.trim();
+      const updatedPrice = parseFloat(document.getElementById("editProductPrice").value);
+      const updatedQuantity = parseInt(document.getElementById("editProductQuantity").value);
+      const updatedDescription = document.getElementById("editProductDescription").value.trim();
+
+      if (!updatedName || isNaN(updatedPrice) || isNaN(updatedQuantity) || !updatedDescription) {
+        alert("Please fill all fields correctly.");
+        return;
       }
-    });
-  }
-});
-
-// 🚀 Initialize everything when window loads
-window.onload = () => {
-  loadShopName();
-  loadDashboardMetrics();
-  renderCharts();
-  
-  // Initialize all event listeners
-  initializeEventListeners();
-  
-  // Initialize offers button if exists
-  const viewOffersBtn = document.getElementById("view-all-offers");
-  if (viewOffersBtn) viewOffersBtn.addEventListener("click", loadOffers);
-  
-  // Initialize orders button if exists
-  const viewOrdersBtn = document.getElementById("view-orders");
-  if (viewOrdersBtn) viewOrdersBtn.addEventListener("click", loadOrders);
-  
-  // Initialize product form if exists
-  const productForm = document.getElementById("product-form");
-  if (productForm) productForm.addEventListener("submit", handleProductSubmit);
-  
-  // Initialize offer form if exists
-  const offerForm = document.getElementById("offer-form");
-  if (offerForm) {
-    offerForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("offer-name").value;
-      const description = document.getElementById("offer-description").value;
-      const discount = parseFloat(document.getElementById("offer-discount").value);
-      const type = document.getElementById("offer-type").value;
 
       try {
-        const offerRef = await addDoc(collection(db, "offers"), {
-          shopId,
-          name,
-          description,
-          type,
-          discount: Number(discount),
-          startDate: new Date(),
-          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          createdAt: serverTimestamp(),
-          ownerId: auth.currentUser.uid
+        await updateDoc(productRef, {
+          name: updatedName,
+          price: updatedPrice,
+          quantity: updatedQuantity,
+          description: updatedDescription,
+          updatedAt: new Date()
         });
-        alert("Offer created successfully!");
-        e.target.reset();
-        await loadOffers();
+        alert("Product updated successfully!");
+        bootstrapModal.hide();
+        // Reload product list
+        loadAllProducts(currentShopId);
       } catch (error) {
-        console.error("Error creating offer: ", error);
-        alert("Failed to create offer: " + error.message);
+        console.error("Error updating product:", error);
+        alert("Failed to update product. Please try again.");
       }
-    });
+    };
   }
-  
-  // Initialize smooth scrolling for navigation
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    if (anchor) {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth'
-          });
-        }
-      });
-    }
-  });
-};
+});

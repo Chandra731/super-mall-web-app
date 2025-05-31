@@ -1,0 +1,71 @@
+{
+  "displayName": "User_View_Cart",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "view-cart-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Show me my cart"
+        }
+      ]
+    },
+    {
+      "name": "view-cart-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What is in my shopping cart?"
+        }
+      ]
+    },
+    {
+      "name": "view-cart-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me view my cart"
+        }
+      ]
+    },
+    {
+      "name": "view-cart-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I see my cart items?"
+        }
+      ]
+    },
+    {
+      "name": "view-cart-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to my cart"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To view your cart, click on the cart icon at the top right corner of the page. You will see all the products you have added. You can increase or decrease quantities, remove items, or proceed to checkout. Would you like help with any of these actions?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/viewcart-followup",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}

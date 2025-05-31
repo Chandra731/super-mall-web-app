@@ -1,0 +1,71 @@
+{
+  "displayName": "User_Submit_Review",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "submit-review-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "I want to submit a review"
+        }
+      ]
+    },
+    {
+      "name": "submit-review-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I write a product review?"
+        }
+      ]
+    },
+    {
+      "name": "submit-review-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me submit a review"
+        }
+      ]
+    },
+    {
+      "name": "submit-review-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to review a product"
+        }
+      ]
+    },
+    {
+      "name": "submit-review-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How to rate a product?"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To submit a review, go to the product page and scroll down to the reviews section. Click on 'Write a Review', enter your rating and comments, and submit. Would you like help with a specific product review?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/submitreview-followup",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}

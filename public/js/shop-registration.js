@@ -59,21 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      for (let i = 0; i < files.length; i++) {
-        if (!validTypes.includes(files[i].type)) {
-          throw new Error('Only JPG, PNG or WebP images are allowed');
-        }
-        if (files[i].size > 5 * 1024 * 1024) { // 5MB
-          throw new Error('Image size must be less than 5MB');
-        }
+      const file = files[0];
+      if (!validTypes.includes(file.type)) {
+        throw new Error('Only JPG, PNG or WebP images are allowed');
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB
+        throw new Error('Image size must be less than 5MB');
       }
 
       const formData = new FormData();
-      for (let i = 0; i < files.length; i++) {
-        formData.append('shopImages', files[i]);
-      }
+      formData.append('shopImage', file);
 
-      const uploadResponse = await fetch('http://localhost:5001/upload/shop-images', {
+      const uploadResponse = await fetch('http://localhost:5001/upload/shops', {
         method: 'POST',
         body: formData,
         headers: {
@@ -98,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const result = await uploadResponse.json();
-      const imageUrls = result.imageUrls || [];
+      const imageUrls = result.urls || [];
 
       // Validate required fields
       const requiredFields = ['shop-name', 'shop-category', 'shop-floor', 'shop-number'];

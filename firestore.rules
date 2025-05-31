@@ -99,6 +99,16 @@ service cloud.firestore {
     match /{document=**} {
       allow read: if isAdmin();
     }
+    
+    // 🔒 TRANSACTIONS
+    match /transactions/{transactionId} {
+      allow create: if request.auth != null &&
+                    request.resource.data.userId != null &&
+                    request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null &&
+                  resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
 
     // 🔒 OFFERS
     match /offers/{offerId} {

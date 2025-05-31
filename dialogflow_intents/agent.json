@@ -1,0 +1,12 @@
+{
+  "description": "SuperMall AI Assistant Agent",
+  "language": "en",
+  "defaultTimezone": "Asia/Kolkata",
+  "mlMinConfidence": 0.3,
+  "supportedLanguages": [],
+  "enableLogging": true,
+  "matchMode": "MATCH_MODE_HYBRID",
+  "classificationThreshold": 0.3,
+  "apiVersion": "V2",
+  "tier": "STANDARD"
+}

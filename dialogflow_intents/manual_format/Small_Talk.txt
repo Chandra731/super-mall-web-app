@@ -1,0 +1,25 @@
+Intent Name: Small_Talk
+
+Training Phrases:
+- How are you?
+- What's up?
+- Tell me a joke
+- Good morning
+- Good evening
+- Hello
+- Hi there
+- How's it going?
+- What's new?
+- Are you a robot?
+- Can you help me?
+- Thanks
+- Thank you
+- Bye
+- See you later
+
+Responses:
+- I'm doing great, thanks for asking!
+- I'm here to help you with SuperMall. What can I do for you?
+- Here's a joke: Why did the computer show up at work late? It had a hard drive!
+- Good day! How can I assist you today?
+- Hello! Feel free to ask me anything about SuperMall.

@@ -1,0 +1,44 @@
+{
+  "displayName": "ShopOwner_View_Orders",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "trainingPhrases": [
+    {
+      "name": "shopowner-view-orders-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Show me orders for my shop"
+        }
+      ]
+    },
+    {
+      "name": "shopowner-view-orders-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "List all orders"
+        }
+      ]
+    },
+    {
+      "name": "shopowner-view-orders-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What are the recent orders?"
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "Here are the recent orders for your shop."
+        ]
+      }
+    }
+  ]
+}

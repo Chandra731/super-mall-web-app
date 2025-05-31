@@ -1,0 +1,71 @@
+{
+  "displayName": "ShopOwner_Manage_Products",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "manage-products-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "I want to manage my products"
+        }
+      ]
+    },
+    {
+      "name": "manage-products-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I add a new product?"
+        }
+      ]
+    },
+    {
+      "name": "manage-products-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me update product details"
+        }
+      ]
+    },
+    {
+      "name": "manage-products-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to delete a product"
+        }
+      ]
+    },
+    {
+      "name": "manage-products-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What are the steps to manage products?"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To manage your products, go to your Shop Owner Dashboard and click on 'Manage Products'. You can add new products by filling in the product details and uploading images. To update or delete existing products, select the product from the list and choose the appropriate action. Would you like help with adding, updating, or deleting a product?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/manageproducts-followup",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}

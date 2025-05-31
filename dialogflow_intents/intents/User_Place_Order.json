@@ -1,0 +1,71 @@
+{
+  "displayName": "User_Place_Order",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "place-order-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "I want to place an order"
+        }
+      ]
+    },
+    {
+      "name": "place-order-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I checkout?"
+        }
+      ]
+    },
+    {
+      "name": "place-order-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me place an order"
+        }
+      ]
+    },
+    {
+      "name": "place-order-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to pay for my cart"
+        }
+      ]
+    },
+    {
+      "name": "place-order-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What are the steps to place an order?"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To place an order, first add products to your cart. Then go to your cart page, review your items, and click on the checkout button. You will be guided to the payment page to complete your purchase. Would you like me to help you with any specific step?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/placeorder-followup",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}

@@ -16,6 +16,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/fir
 
 const shopFunctions = {
   comparisonProducts: [],
+  allProducts: [],
 
   createComparisonModal: function () {
     const modal = document.createElement('div');
@@ -160,6 +161,32 @@ const shopFunctions = {
     });
   },
 
+  filterProducts: function () {
+    const searchInputElem = document.getElementById('search-input');
+    const minPriceElem = document.getElementById('min-price');
+    const maxPriceElem = document.getElementById('max-price');
+
+    if (!searchInputElem || !minPriceElem || !maxPriceElem) {
+      console.error("Filter input elements not found");
+      return;
+    }
+
+    const searchInput = searchInputElem.value.toLowerCase();
+    const minPriceInput = parseFloat(minPriceElem.value);
+    const maxPriceInput = parseFloat(maxPriceElem.value);
+
+    const filtered = this.allProducts.filter(product => {
+      const name = product.name || "";
+      const price = product.price || 0;
+      const matchesName = name.toLowerCase().includes(searchInput);
+      const matchesMinPrice = isNaN(minPriceInput) ? true : price >= minPriceInput;
+      const matchesMaxPrice = isNaN(maxPriceInput) ? true : price <= maxPriceInput;
+      return matchesName && matchesMinPrice && matchesMaxPrice;
+    });
+
+    this.renderProducts(filtered);
+  },
+
   addToComparison: function (product) {
     if (this.comparisonProducts.some(p => p.id === product.id)) {
       alert("This product is already selected for comparison");
@@ -204,6 +231,7 @@ const shopFunctions = {
   },
 
   init: async function () {
+    const self = this;
     const shopId = new URLSearchParams(window.location.search).get("id");
     if (!shopId) {
       document.getElementById("shop-name").textContent = "Shop Not Found";
@@ -211,9 +239,38 @@ const shopFunctions = {
     }
 
     this.createComparisonModal();
-    const products = await this.fetchProducts(shopId);
+    this.allProducts = await this.fetchProducts(shopId);
     this.updateCartCount();
-    this.renderProducts(products);
+    this.renderProducts(this.allProducts);
+
+    // Add filter event listeners with correct 'this' context
+    const searchInputElem = document.getElementById('search-input');
+    const minPriceElem = document.getElementById('min-price');
+    const maxPriceElem = document.getElementById('max-price');
+
+    if (searchInputElem) {
+      searchInputElem.addEventListener('input', function() {
+        self.filterProducts();
+      });
+    } else {
+      console.error("Search input element not found");
+    }
+
+    if (minPriceElem) {
+      minPriceElem.addEventListener('input', function() {
+        self.filterProducts();
+      });
+    } else {
+      console.error("Min price input element not found");
+    }
+
+    if (maxPriceElem) {
+      maxPriceElem.addEventListener('input', function() {
+        self.filterProducts();
+      });
+    } else {
+      console.error("Max price input element not found");
+    }
   }
 };
 

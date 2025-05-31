@@ -96,8 +96,11 @@
     <div class="d-flex justify-content-between align-items-center">
       <h2>Admin Dashboard</h2>
       <div>
-        <a href="admin-profile.html" class="btn btn-primary mr-2">
+        <a href="admin-profile.html" class="btn btn-primary me-2">
           <i class="fas fa-user"></i> My Profile
+        </a>
+        <a href="/admin-reports.html" class="btn btn-outline-primary me-2">
+          📊 Reports & Predictions
         </a>
         <button class="btn btn-danger" id="logout">Logout</button>
       </div>
@@ -124,12 +127,25 @@
     <div class="section-title">Insights</div>
     <div class="row">
       <div class="col-md-6">
-        <h5>Sales Trends</h5>
+        <h5>Shop-wise Sales</h5>
         <canvas id="salesChart"></canvas>
       </div>
       <div class="col-md-6">
-        <h5>Revenue Trends</h5>
+        <h5>Shop-wise Revenue</h5>
         <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Overall Sales and Revenue Trends -->
+    <div class="section-title">Overall Trends</div>
+    <div class="row">
+      <div class="col-md-6">
+        <h5>Overall Sales Trend</h5>
+        <canvas id="overallSalesChart"></canvas>
+      </div>
+      <div class="col-md-6">
+        <h5>Overall Revenue Trend</h5>
+        <canvas id="overallRevenueChart"></canvas>
       </div>
     </div>
 
@@ -150,7 +166,19 @@
     <div id="user-management-list">
       <div class="spinner">Loading users...</div>
     </div>
+
+    <!-- Shop Owners Management -->
+    <div class="section-title">Shop Owners Management</div>
+    <div id="shop-owner-management-list">
+      <div class="spinner">Loading shop owners...</div>
+    </div>
   </div>
+
+  <footer class="footer py-3 bg-dark text-light">
+    <div class="container text-center">
+        <p>&copy; 2025 ShopEase. All rights reserved.</p>
+    </div>
+  </footer>
 
   <!-- JavaScript -->
   <script type="module" src="js/admin-dashboard.js"></script>

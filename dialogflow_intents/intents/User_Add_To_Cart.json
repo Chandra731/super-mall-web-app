@@ -1,0 +1,71 @@
+{
+  "displayName": "User_Add_To_Cart",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "add-to-cart-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Add a product to my cart"
+        }
+      ]
+    },
+    {
+      "name": "add-to-cart-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I add items to cart?"
+        }
+      ]
+    },
+    {
+      "name": "add-to-cart-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me add a product"
+        }
+      ]
+    },
+    {
+      "name": "add-to-cart-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to add products to cart"
+        }
+      ]
+    },
+    {
+      "name": "add-to-cart-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How to put items in my shopping cart?"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To add a product to your cart, browse to the shop's product list, find the product you want, and click the 'Add to Cart' button next to it. Would you like me to help you find a specific product or shop?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/addtocart-followup",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}

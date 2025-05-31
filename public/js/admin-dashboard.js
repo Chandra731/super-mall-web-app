@@ -31,11 +31,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Metrics Section
     await updateMetrics();
 
-    // Graphical Insights
-    const salesChartCtx = document.getElementById('salesChart').getContext('2d');
-    const revenueChartCtx = document.getElementById('revenueChart').getContext('2d');
-    renderLineChart(salesChartCtx, 'Sales Trends');
-    renderLineChart(revenueChartCtx, 'Revenue Trends');
+    // Load and render dynamic sales and revenue charts
+    await loadSalesAndRevenueData();
 
     // Shop Approval System
     const pendingShops = await fetchPendingShops();
@@ -95,7 +92,7 @@ async function fetchPendingShops() {
 }
 
 // Render Pending Shops
-function renderPendingShops(shops) {
+function renderPendingShops(shops, showAll = false) {
   const container = document.getElementById('pending-shops');
   container.innerHTML = '';
 
@@ -104,10 +101,14 @@ function renderPendingShops(shops) {
     return;
   }
 
-  shops.forEach((shop) => {
+  const shopsToShow = showAll ? shops : shops.slice(0, 3);
+
+  shopsToShow.forEach((shop) => {
     const imageUrl = (Array.isArray(shop.shopImageUrls) && shop.shopImageUrls.length > 0)
       ? shop.shopImageUrls[0]
       : shop.shopImage || 'public/images/default-shop.jpg';
+
+    console.log('Pending shop image URL:', imageUrl);
 
     const item = `
       <div class="shop-card">
@@ -128,26 +129,43 @@ function renderPendingShops(shops) {
       </div>`;
     container.insertAdjacentHTML('beforeend', item);
   });
+
+  if (!showAll && shops.length > 3) {
+    const showMoreBtn = document.createElement('button');
+    showMoreBtn.textContent = 'Show All Pending Shops';
+    showMoreBtn.className = 'btn btn-primary mt-2';
+    showMoreBtn.addEventListener('click', () => {
+      renderPendingShops(shops, true);
+    });
+    container.appendChild(showMoreBtn);
+  }
 }
-
-
 
 // Approve Shop
 window.approveShop = async function (shopId) {
   try {
     const shopRef = doc(db, 'shops', shopId);
+    const shopDoc = await getDoc(shopRef);
+    if (!shopDoc.exists()) {
+      alert('Shop not found');
+      return;
+    }
+    const shopData = shopDoc.data();
+
     await updateDoc(shopRef, { 
       approved: true,
       status: 'approved',
       approvedAt: new Date() 
     });
-    
-    // Also update the owner's user document
-    const ownerRef = doc(db, 'users', shop.ownerId || shop.owner);
-    await updateDoc(ownerRef, {
-      hasApprovedShop: true
-    });
-    
+
+    // Update the owner's user document correctly
+    if (shopData.ownerId) {
+      const ownerRef = doc(db, 'users', shopData.ownerId);
+      await updateDoc(ownerRef, {
+        hasApprovedShop: true
+      });
+    }
+
     alert('Shop approved! Owner can now access their dashboard.');
     const pendingShops = await fetchPendingShops();
     renderPendingShops(pendingShops);
@@ -184,7 +202,7 @@ async function fetchFeaturedShops() {
 }
 
 // Render Featured Shops
-function renderFeaturedShops(shops) {
+function renderFeaturedShops(shops, showAll = false) {
   const container = document.getElementById('featured-shops');
   container.innerHTML = '';
 
@@ -193,11 +211,15 @@ function renderFeaturedShops(shops) {
     return;
   }
 
-  shops.forEach((shop) => {
+  const shopsToShow = showAll ? shops : shops.slice(0, 3);
+
+  shopsToShow.forEach((shop) => {
     const isFeatured = shop.featured === true;
     const imageUrl = (Array.isArray(shop.shopImageUrls) && shop.shopImageUrls.length > 0)
       ? shop.shopImageUrls[0]
       : shop.shopImage || 'public/images/default-shop.jpg';
+
+    console.log('Featured shop image URL:', imageUrl);
 
     const item = `
       <div class="shop-card">
@@ -219,8 +241,17 @@ function renderFeaturedShops(shops) {
       </div>`;
     container.insertAdjacentHTML('beforeend', item);
   });
-}
 
+  if (!showAll && shops.length > 3) {
+    const showMoreBtn = document.createElement('button');
+    showMoreBtn.textContent = 'Show All Featured Shops';
+    showMoreBtn.className = 'btn btn-primary mt-2';
+    showMoreBtn.addEventListener('click', () => {
+      renderFeaturedShops(shops, true);
+    });
+    container.appendChild(showMoreBtn);
+  }
+}
 
 // Toggle Featured Shop
 window.toggleFeaturedShop = async function (shopId, currentlyFeatured) {
@@ -246,23 +277,116 @@ async function fetchUsers() {
   }
 }
 
-// Render Users
+// Render Users and Shop Owners separately with pagination and scroll
 function renderUsers(users) {
-  const container = document.getElementById('user-management-list');
-  container.innerHTML = '';
+  const userContainer = document.getElementById('user-management-list');
+  const shopOwnerContainer = document.getElementById('shop-owner-management-list');
+
+  userContainer.innerHTML = '';
+  shopOwnerContainer.innerHTML = '';
+
   if (users.length === 0) {
-    container.innerHTML = '<p>No users available.</p>';
+    userContainer.innerHTML = '<p>No users available.</p>';
+    shopOwnerContainer.innerHTML = '<p>No shop owners available.</p>';
     return;
   }
-  users.forEach((user) => {
-    const item = `
-      <div class="list-group-item">
-        <h5>${user.email}</h5>
-        <p>Role: ${user.role || 'N/A'}</p>
-        <button class="btn btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
-      </div>`;
-    container.insertAdjacentHTML('beforeend', item);
+
+  // Separate users and shop owners by checking role string case-insensitively
+  const normalUsers = users.filter(u => {
+    const role = (u.role || '').toLowerCase();
+    return role !== 'shop-owner' && role !== 'shopowner' && role !== 'owner';
   });
+  const shopOwners = users.filter(u => {
+    const role = (u.role || '').toLowerCase();
+    return role === 'shop-owner' || role === 'shopowner' || role === 'owner';
+  });
+
+  // Helper to create table with scroll and pagination
+  function createTable(container, data, title) {
+    if (data.length === 0) {
+      container.innerHTML = `<p>No ${title.toLowerCase()} available.</p>`;
+      return;
+    }
+
+    const tableWrapper = document.createElement('div');
+    tableWrapper.style.maxHeight = '300px';
+    tableWrapper.style.overflowY = 'auto';
+    tableWrapper.style.border = '1px solid #ddd';
+    tableWrapper.style.borderRadius = '4px';
+
+    const table = document.createElement('table');
+    table.className = 'table table-striped table-sm mb-0';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>`;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+
+    tableWrapper.appendChild(table);
+    container.appendChild(tableWrapper);
+
+    // Pagination variables
+    let currentPage = 1;
+    const rowsPerPage = 5;
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+
+    function renderPage(page) {
+      tbody.innerHTML = '';
+      const start = (page - 1) * rowsPerPage;
+      const end = Math.min(start + rowsPerPage, data.length);
+      for (let i = start; i < end; i++) {
+        const user = data[i];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${user.email}</td>
+          <td>${user.role || 'N/A'}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}')">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // Pagination controls
+    const pagination = document.createElement('div');
+    pagination.className = 'mt-2 d-flex justify-content-center';
+
+    function createPageButton(page) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-outline-primary btn-sm mx-1';
+      btn.textContent = page;
+      if (page === currentPage) {
+        btn.disabled = true;
+      }
+      btn.addEventListener('click', () => {
+        currentPage = page;
+        renderPage(currentPage);
+        updatePagination();
+      });
+      return btn;
+    }
+
+    function updatePagination() {
+      pagination.innerHTML = '';
+      for (let i = 1; i <= totalPages; i++) {
+        pagination.appendChild(createPageButton(i));
+      }
+    }
+
+    container.appendChild(pagination);
+
+    renderPage(currentPage);
+    updatePagination();
+  }
+
+  createTable(userContainer, normalUsers, 'Users');
+  createTable(shopOwnerContainer, shopOwners, 'Shop Owners');
 }
 
 // Delete User
@@ -278,21 +402,130 @@ window.deleteUser = async function (userId) {
   }
 };
 
-// Render Line Chart
-function renderLineChart(ctx, label) {
+// Render Line Chart with dynamic data
+let salesChartInstance = null;
+let revenueChartInstance = null;
+
+async function loadSalesAndRevenueData() {
+  try {
+    // Fetch all shops
+    const shopsSnapshot = await getDocs(collection(db, 'shops'));
+    const shops = shopsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Prepare data structures
+    const shopSales = {};
+    const shopRevenue = {};
+    const overallSalesByMonth = {};
+    const overallRevenueByMonth = {};
+
+    // Initialize shop data
+    shops.forEach(shop => {
+      shopSales[shop.id] = 0;
+      shopRevenue[shop.id] = 0;
+    });
+
+    // Fetch all orders
+    const ordersSnapshot = await getDocs(collection(db, 'orders'));
+
+    ordersSnapshot.forEach(doc => {
+      const order = doc.data();
+      if (order.status === 'paid' || order.status === 'delivered') {
+        const shopId = order.shopId;
+        const total = order.total || 0;
+        shopSales[shopId] = (shopSales[shopId] || 0) + 1;
+        shopRevenue[shopId] = (shopRevenue[shopId] || 0) + total;
+
+        // Aggregate overall monthly data
+        const createdAt = order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt)) : new Date();
+        const monthKey = createdAt.getFullYear() + '-' + String(createdAt.getMonth() + 1).padStart(2, '0');
+        overallSalesByMonth[monthKey] = (overallSalesByMonth[monthKey] || 0) + 1;
+        overallRevenueByMonth[monthKey] = (overallRevenueByMonth[monthKey] || 0) + total;
+      }
+    });
+
+    // Prepare shop-wise sales and revenue arrays for chart
+    const shopNames = shops.map(shop => shop.name || 'Unnamed Shop');
+    const salesData = shops.map(shop => shopSales[shop.id] || 0);
+    const revenueData = shops.map(shop => shopRevenue[shop.id] || 0);
+
+    // Prepare overall monthly labels sorted
+    const months = Object.keys(overallSalesByMonth).sort();
+    const overallSalesData = months.map(m => overallSalesByMonth[m]);
+    const overallRevenueData = months.map(m => overallRevenueByMonth[m]);
+
+    // Render shop-wise sales chart
+    const salesChartCtx = document.getElementById('salesChart').getContext('2d');
+    if (salesChartInstance) salesChartInstance.destroy();
+    salesChartInstance = new Chart(salesChartCtx, {
+      type: 'bar',
+      data: {
+        labels: shopNames,
+        datasets: [{
+          label: 'Shop-wise Sales',
+          data: salesData,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // Render shop-wise revenue chart
+    const revenueChartCtx = document.getElementById('revenueChart').getContext('2d');
+    if (revenueChartInstance) revenueChartInstance.destroy();
+    revenueChartInstance = new Chart(revenueChartCtx, {
+      type: 'bar',
+      data: {
+        labels: shopNames,
+        datasets: [{
+          label: 'Shop-wise Revenue (₹)',
+          data: revenueData,
+          backgroundColor: 'rgba(75, 192, 192, 0.7)'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // Render overall sales trend line chart
+    renderLineChart('overallSalesChart', months, overallSalesData, 'Overall Sales Trend');
+
+    // Render overall revenue trend line chart
+    renderLineChart('overallRevenueChart', months, overallRevenueData, 'Overall Revenue Trend (₹)');
+
+  } catch (error) {
+    console.error('Error loading sales and revenue data:', error);
+  }
+}
+
+function renderLineChart(canvasId, labels, data, label) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
   new Chart(ctx, {
     type: 'line',
     data: {
-      labels: ['January', 'February', 'March', 'April'],
-      datasets: [
-        {
-          label,
-          data: [10, 20, 30, 40],
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        },
-      ],
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        tension: 0.3
+      }]
     },
-    options: { responsive: true },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
   });
 }

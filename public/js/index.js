@@ -11,6 +11,7 @@ import {
   orderBy 
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
+import './reviews.js'; 
 // Create Firestore document reference helper
 const getDocRef = (collectionPath, docId) => doc(db, collectionPath, docId);
 

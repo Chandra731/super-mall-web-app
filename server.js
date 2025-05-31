@@ -6,6 +6,12 @@ const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
+const Razorpay = require('razorpay');
+
+// Dialogflow integration imports
+const dialogflow = require('@google-cloud/dialogflow');
+const uuid = require('uuid');
+
 // Custom file cleanup function
 function cleanupOldFiles(dir, maxAgeMs) {
   fs.readdir(dir, { withFileTypes: true }, (err, files) => {
@@ -40,11 +46,25 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = 5001;
 
+// Dialogflow configuration - replace with your actual values
+const CREDENTIALS_PATH = './credentials.json';
+const projectId = 'divya-ygiu';
+
+// Create a new session client
+const sessionClient = new dialogflow.SessionsClient({
+  keyFilename: CREDENTIALS_PATH,
+});
+
+// Razorpay instance with test credentials (replace with your own)
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_aInlr2JkOeUewn',
+  key_secret: 'wGUUFXRtNz6BW76rGArkBf1U'
+});
 // Upload folders
 const uploadDirs = {
-  shops: 'uploads/shop-images/',
-  profile: 'uploads/profile-images/',
-  products: 'uploads/product-images/'
+  shops: 'shop-images/',
+  profile: 'profile-images/',
+  products: 'product-images/'
 };
 
 // Ensure upload directories exist
@@ -82,7 +102,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const type = req.params.type;
     if (uploadDirs[type]) {
-      cb(null, uploadDirs[type]);
+      cb(null, 'uploads/' + uploadDirs[type]);
     } else {
       cb(new Error('Invalid upload type'));
     }
@@ -120,6 +140,56 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Dialogflow API endpoint
+app.post('/api/dialogflow', async (req, res) => {
+  try {
+    const { message, sessionId, userRole } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Use provided sessionId or generate a new one
+    const sessionIdToUse = sessionId || uuid.v4();
+
+    const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionIdToUse);
+
+    // Prepare input contexts based on user role
+    const inputContexts = [];
+    if (userRole) {
+      inputContexts.push({
+        name: `${sessionPath}/contexts/userrole_${userRole.toLowerCase()}`,
+        lifespanCount: 5,
+      });
+    }
+
+    const request = {
+      session: sessionPath,
+      queryInput: {
+        text: {
+          text: message,
+          languageCode: 'en-US',
+        },
+      },
+      queryParams: {
+        contexts: inputContexts,
+      },
+    };
+
+    const responses = await sessionClient.detectIntent(request);
+    const result = responses[0].queryResult;
+
+    res.json({
+      responseText: result.fulfillmentText,
+      intent: result.intent ? result.intent.displayName : null,
+      sessionId: sessionIdToUse,
+      parameters: result.parameters ? result.parameters.fields : null,
+    });
+  } catch (error) {
+    console.error('Dialogflow error:', error);
+    res.status(500).json({ error: 'Dialogflow request failed' });
+  }
+});
 
 // Enhanced static file serving with proper MIME types
 app.use(express.static('public', {
@@ -166,10 +236,9 @@ app.get('/favicon.png', (req, res) => {
 
 // Fallback route for client-side routing
 // Only serve index.html for non-API routes
-app.get(/^\/(?!api|upload|uploads|api-docs).*/, (req, res) => {
+app.get(/^\/(?!api|upload|uploads|api-docs|payment).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
 
 // Request logging and timing middleware
 app.use((req, res, next) => {
@@ -182,6 +251,24 @@ app.use((req, res, next) => {
   });
 
   next();
+});
+
+// Razorpay order creation endpoint
+app.post('/payment/create-order', async (req, res) => {
+  try {
+    const { amount, currency, receipt } = req.body;
+    const options = {
+      amount: amount * 100, // amount in the smallest currency unit
+      currency: currency || 'INR',
+      receipt: receipt || `receipt_${Date.now()}`,
+      payment_capture: 1
+    };
+    const order = await razorpay.orders.create(options);
+    res.json({ success: true, order });
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    res.status(500).json({ success: false, message: 'Failed to create order' });
+  }
 });
 
 /**
@@ -233,8 +320,15 @@ app.post('/upload/:type', (req, res, next) => {
       req.files = [req.file]; // Convert to array format for handleUpload
       next();
     });
+  } else if (type === 'shops') {
+    // Handle shop images with single file upload
+    upload.single('shopImage')(req, res, (err) => {
+      if (err) return next(err);
+      req.files = [req.file]; // Convert to array format for handleUpload
+      next();
+    });
   } else {
-    // Handle other types (shops, profile) with multiple files
+    // Handle other types (profile) with multiple files
     upload.array('images', 5)(req, res, next);
   }
 }, (req, res) => {
@@ -301,7 +395,7 @@ const swaggerOptions = {
     info: {
       title: 'Super Mall API',
       version: '1.0.0',
-      description: 'API for shop and product image uploads'
+      description: 'API for shop and product image uploads and Razorpay payment integration'
     },
     servers: [
       { url: `http://localhost:${PORT}` }

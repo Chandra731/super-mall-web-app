@@ -1,0 +1,79 @@
+{
+  "displayName": "Small_Talk",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "small-talk-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Hello"
+        }
+      ]
+    },
+    {
+      "name": "small-talk-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Hi there"
+        }
+      ]
+    },
+    {
+      "name": "small-talk-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How are you?"
+        }
+      ]
+    },
+    {
+      "name": "small-talk-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What's up?"
+        }
+      ]
+    },
+    {
+      "name": "small-talk-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Tell me a joke"
+        }
+      ]
+    },
+    {
+      "name": "small-talk-phrase-6",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Thank you"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "Hello! How can I assist you today?",
+          "Hi there! What can I do for you?",
+          "I'm here to help. How can I assist?",
+          "Sure! Here's a joke: Why did the scarecrow win an award? Because he was outstanding in his field!",
+          "You're welcome! Let me know if you need anything else."
+        ]
+      }
+    }
+  ],
+  "outputContexts": [],
+  "followupIntentInfo": []
+}

@@ -1,0 +1,116 @@
+{
+  "displayName": "User_Shopping_Flow",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "start-shopping-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "I want to shop"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Show me how to buy products"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me shop"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I place an order?"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to buy a product"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-6",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "What are the steps to order?"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-7",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "I want to browse shops"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-8",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How to add items to cart?"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-9",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I checkout?"
+        }
+      ]
+    },
+    {
+      "name": "start-shopping-phrase-10",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Explain the shopping process"
+        }
+      ]
+    }
+  ],
+  "parameters": [],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To start shopping, go to the main page and click on 'Browse Floors'. You can select a floor to see the shops available there. After selecting a shop, click on 'See Products' to view all products. You can add products to your cart, view your cart, and proceed to checkout to place your order. Would you like me to guide you step-by-step through any of these actions?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/floor-selection",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}

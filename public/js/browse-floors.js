@@ -57,17 +57,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const card = document.createElement('div');
     card.className = 'card shop-card';
 
+    // Shop image (like index.js featured shops)
+    let imageUrl = (Array.isArray(shop.shopImageUrls) && shop.shopImageUrls.length > 0)
+      ? shop.shopImageUrls[0]
+      : shop.shopImage || 'public/images/default-shop.jpg';
+
+    console.log('Shop image URL:', imageUrl);
+
+    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('uploads/')) {
+      imageUrl = 'uploads/product-images/' + imageUrl;
+    }
+
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = shop.name || 'Shop Image';
+    img.className = 'card-img-top';
+    img.onerror = function() {
+      this.src = 'public/images/default-shop.jpg';
+    };
+    card.appendChild(img);
+
     const cardBody = document.createElement('div');
     cardBody.className = 'card-body';
 
-    // Shop logo
-    if (shop.logoUrl) {
-      const img = document.createElement('img');
-      img.src = shop.logoUrl;
-      img.alt = `${shop.name} logo`;
-      img.className = 'shop-logo img-fluid mb-3 mx-auto d-block';
-      cardBody.appendChild(img);
-    }
+    // Remove old shop logo block
+    // if (shop.logoUrl) {
+    //   const img = document.createElement('img');
+    //   img.src = shop.logoUrl;
+    //   img.alt = `${shop.name} logo`;
+    //   img.className = 'shop-logo img-fluid mb-3 mx-auto d-block';
+    //   cardBody.appendChild(img);
+    // }
 
     // Shop name
     const title = document.createElement('h3');

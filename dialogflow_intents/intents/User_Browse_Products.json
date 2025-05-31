@@ -1,0 +1,109 @@
+{
+  "displayName": "User_Browse_Products",
+  "priority": 500000,
+  "isFallback": false,
+  "mlDisabled": false,
+  "webhookState": "WEBHOOK_STATE_ENABLED",
+  "trainingPhrases": [
+    {
+      "name": "browse-products-phrase-1",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Show me products from "
+        },
+        {
+          "text": "{shopName}",
+          "entityType": "@shop_name",
+          "alias": "shopName",
+          "userDefined": true
+        }
+      ]
+    },
+    {
+      "name": "browse-products-phrase-2",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "I want to see items in "
+        },
+        {
+          "text": "{shopName}",
+          "entityType": "@shop_name",
+          "alias": "shopName",
+          "userDefined": true
+        }
+      ]
+    },
+    {
+      "name": "browse-products-phrase-3",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "List products available at "
+        },
+        {
+          "text": "{shopName}",
+          "entityType": "@shop_name",
+          "alias": "shopName",
+          "userDefined": true
+        }
+      ]
+    },
+    {
+      "name": "browse-products-phrase-4",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "How do I browse products?"
+        }
+      ]
+    },
+    {
+      "name": "browse-products-phrase-5",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Guide me to browse products"
+        }
+      ]
+    },
+    {
+      "name": "browse-products-phrase-6",
+      "type": "EXAMPLE",
+      "parts": [
+        {
+          "text": "Help me find products"
+        }
+      ]
+    }
+  ],
+  "parameters": [
+    {
+      "name": "shopName",
+      "displayName": "shopName",
+      "value": "$shopName",
+      "entityTypeDisplayName": "@shop_name",
+      "mandatory": true,
+      "prompts": [
+        "Which shop's products would you like to browse?"
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "text": {
+        "text": [
+          "To browse products, start from the main page and click on 'Browse Floors'. Select the floor you want, then choose a shop on that floor. After selecting the shop, click on 'See Products' to view all available items. Would you like help selecting a floor or a shop?"
+        ]
+      }
+    }
+  ],
+  "outputContexts": [
+    {
+      "name": "projects/project-id/agent/sessions/session-id/contexts/browseproducts-followup",
+      "lifespanCount": 5
+    }
+  ],
+  "followupIntentInfo": []
+}
